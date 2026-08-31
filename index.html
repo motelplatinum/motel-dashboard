@@ -132,7 +132,7 @@ select.finput option{background:var(--s2)}
 </style>
 </head>
 <body>
-
+ 
 <nav class="nav">
   <div class="brand">🏨 <span>MOTEL</span></div>
   <button class="ntab active" onclick="showPage('briote',this)">🟡 Briote</button>
@@ -146,7 +146,7 @@ select.finput option{background:var(--s2)}
     <button class="expbtn" onclick="exportHTML()">💾 Exportar HTML</button>
   </div>
 </nav>
-
+ 
 <!-- ═══ BRIOTE ═══════════════════════════════════════════════ -->
 <div class="page active" id="page-briote">
   <div class="kgrid" id="b-kpis"></div>
@@ -225,7 +225,7 @@ select.finput option{background:var(--s2)}
     <div style="position:relative;height:200px"><canvas id="b-hyr-tkt"></canvas></div>
   </div>
 </div>
-
+ 
 <!-- ═══ BRT ═══════════════════════════════════════════════════ -->
 <div class="page" id="page-brt">
   <div class="kgrid" id="brt-kpis"></div>
@@ -304,7 +304,7 @@ select.finput option{background:var(--s2)}
     <div style="position:relative;height:200px"><canvas id="brt-hyr-tkt"></canvas></div>
   </div>
 </div>
-
+ 
 <!-- ═══ COMPARATIVO ══════════════════════════════════════════ -->
 <div class="page" id="page-comp">
   <div class="sec"><span class="dot" style="background:var(--accent)"></span>Visão Geral</div>
@@ -347,7 +347,7 @@ select.finput option{background:var(--s2)}
     <div style="position:relative;height:205px"><canvas id="c-wom"></canvas></div>
   </div>
 </div>
-
+ 
 <!-- ═══ FORMULÁRIO ═══════════════════════════════════════════ -->
 <div class="page" id="page-form">
   <div style="max-width:820px;margin:0 auto">
@@ -380,7 +380,7 @@ select.finput option{background:var(--s2)}
       </div>
       <div id="f-msg" class="fmsg"></div>
     </div>
-
+ 
     <div class="sec"><span class="dot" style="background:var(--purple)"></span>Dias Lançados Manualmente</div>
     <div class="card">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:11px">
@@ -395,25 +395,25 @@ select.finput option{background:var(--s2)}
     </div>
   </div>
 </div>
-
+ 
 <!-- ═══ UPLOAD ════════════════════════════════════════════════ -->
-
+ 
 <!-- HISTORICO -->
 <div class="page" id="page-hist">
   <div class="sec"><span class="dot" style="background:var(--green)"></span>Evolução Anual — 2022 a 2025</div>
-
+ 
   <!-- KPI CARDS - 3 por ano: fat, carros, ticket -->
   <div style="margin-bottom:6px;font-size:.65rem;letter-spacing:2px;text-transform:uppercase;color:var(--briote)">🟡 BRIOTE</div>
   <div id="h-b-kpis" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px"></div>
   <div style="margin-bottom:6px;font-size:.65rem;letter-spacing:2px;text-transform:uppercase;color:var(--brt)">🟢 BRT</div>
   <div id="h-brt-kpis" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px"></div>
-
+ 
   <!-- TABELA COMPARATIVA ANUAL -->
   <div class="sec"><span class="dot" style="background:var(--green)"></span>Tabela Comparativa Anual</div>
   <div class="card" style="margin-bottom:16px">
     <div id="h-annual-table"></div>
   </div>
-
+ 
   <div class="sec"><span class="dot" style="background:var(--green)"></span>Faturamento Anual</div>
   <div class="row c2" style="margin-bottom:16px">
     <div class="card">
@@ -493,7 +493,7 @@ select.finput option{background:var(--s2)}
     </div>
     <div style="position:relative;height:250px"><canvas id="h-mo-evol"></canvas></div>
   </div>
-
+ 
   <!-- TABELA MENSAL COMPARATIVA -->
   <div class="sec"><span class="dot" style="background:var(--green)"></span>Tabela Mensal Detalhada</div>
   <div class="card" style="margin-bottom:16px">
@@ -512,7 +512,7 @@ select.finput option{background:var(--s2)}
     <div id="h-mo-table"></div>
   </div>
 </div>
-
+ 
 <div class="page" id="page-upload">
   <div style="max-width:640px;margin:0 auto">
     <div class="sec"><span class="dot" style="background:var(--blue)"></span>Carregar Planilha Anual</div>
@@ -552,26 +552,26 @@ select.finput option{background:var(--s2)}
     </div>
   </div>
 </div>
-
+ 
 <script>
 // ── Declarações globais ──────────────────────────────────────────────────
 let DB = {};
 let HIST = {briote:{}, brt:{}};
 let activeYear = '2025';
-
+ 
 const COL = m => m==='b'?'#f5c842':'#4af0c4';
 // ── Google Sheets config ──────────────────────────────────────────────────
 const SHEETS = {
   2025: 'https://script.google.com/macros/s/AKfycbwlDYbtbM7-h-Um4TxyOnyBhI8HZQEcEJD_L0Pot9Z4nhm9SIbHRL2kaxgLDAgv4TMY/exec',
   2026: 'https://script.google.com/macros/s/AKfycbwBq_IGXJOjC8M7kVvbX37afBSUlF-QhKo7MXoFNb1qGVsuGE6aS-U096tnFNhrkydz/exec',
 };
-
+ 
 const MONTHS_PTL = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
 const WDL = ['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo'];
-
+ 
 window.addEventListener('load', function() {
 document.getElementById('f-date').value = new Date().toISOString().slice(0,10);
-
+ 
 function parseSheetData(rows, year) {
   const res = []; let curMonth = null, curMonthNum = null;
   for (let i = 0; i < rows.length; i++) {
@@ -605,7 +605,7 @@ function parseSheetData(rows, year) {
   }
   return res;
 }
-
+ 
 function jsonp(url) {
   return new Promise((resolve, reject) => {
     const cb = '_cb_' + Math.random().toString(36).slice(2);
@@ -616,7 +616,7 @@ function jsonp(url) {
     document.head.appendChild(script);
   });
 }
-
+ 
 async function iniciar() {
   document.body.insertAdjacentHTML('afterbegin','<div id="sb-loading" style="position:fixed;inset:0;background:rgba(10,14,22,.92);display:flex;align-items:center;justify-content:center;z-index:9999;flex-direction:column;gap:14px"><div style="font-family:Bebas Neue,cursive;font-size:2rem;letter-spacing:4px;color:#f5c842">CARREGANDO...</div><div id="sb-msg" style="color:#6a7a99;font-size:.85rem">Buscando dados das planilhas...</div></div>');
   try {
@@ -638,7 +638,7 @@ async function iniciar() {
   }
   document.getElementById('sb-loading').remove();
 }
-
+ 
 iniciar();
 });</script>
 <style>
@@ -766,7 +766,7 @@ select.finput option{background:var(--s2)}
 </style>
 </head>
 <body>
-
+ 
 <nav class="nav">
   <div class="brand">🏨 <span>MOTEL</span></div>
   <button class="ntab active" onclick="showPage('briote',this)">🟡 Briote</button>
@@ -780,7 +780,7 @@ select.finput option{background:var(--s2)}
     <button class="expbtn" onclick="exportHTML()">💾 Exportar HTML</button>
   </div>
 </nav>
-
+ 
 <!-- ═══ BRIOTE ═══════════════════════════════════════════════ -->
 <div class="page active" id="page-briote">
   <div class="kgrid" id="b-kpis"></div>
@@ -859,7 +859,7 @@ select.finput option{background:var(--s2)}
     <div style="position:relative;height:200px"><canvas id="b-hyr-tkt"></canvas></div>
   </div>
 </div>
-
+ 
 <!-- ═══ BRT ═══════════════════════════════════════════════════ -->
 <div class="page" id="page-brt">
   <div class="kgrid" id="brt-kpis"></div>
@@ -938,7 +938,7 @@ select.finput option{background:var(--s2)}
     <div style="position:relative;height:200px"><canvas id="brt-hyr-tkt"></canvas></div>
   </div>
 </div>
-
+ 
 <!-- ═══ COMPARATIVO ══════════════════════════════════════════ -->
 <div class="page" id="page-comp">
   <div class="sec"><span class="dot" style="background:var(--accent)"></span>Visão Geral</div>
@@ -981,7 +981,7 @@ select.finput option{background:var(--s2)}
     <div style="position:relative;height:205px"><canvas id="c-wom"></canvas></div>
   </div>
 </div>
-
+ 
 <!-- ═══ FORMULÁRIO ═══════════════════════════════════════════ -->
 <div class="page" id="page-form">
   <div style="max-width:820px;margin:0 auto">
@@ -1014,7 +1014,7 @@ select.finput option{background:var(--s2)}
       </div>
       <div id="f-msg" class="fmsg"></div>
     </div>
-
+ 
     <div class="sec"><span class="dot" style="background:var(--purple)"></span>Dias Lançados Manualmente</div>
     <div class="card">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:11px">
@@ -1029,25 +1029,25 @@ select.finput option{background:var(--s2)}
     </div>
   </div>
 </div>
-
+ 
 <!-- ═══ UPLOAD ════════════════════════════════════════════════ -->
-
+ 
 <!-- HISTORICO -->
 <div class="page" id="page-hist">
   <div class="sec"><span class="dot" style="background:var(--green)"></span>Evolução Anual — 2022 a 2025</div>
-
+ 
   <!-- KPI CARDS - 3 por ano: fat, carros, ticket -->
   <div style="margin-bottom:6px;font-size:.65rem;letter-spacing:2px;text-transform:uppercase;color:var(--briote)">🟡 BRIOTE</div>
   <div id="h-b-kpis" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px"></div>
   <div style="margin-bottom:6px;font-size:.65rem;letter-spacing:2px;text-transform:uppercase;color:var(--brt)">🟢 BRT</div>
   <div id="h-brt-kpis" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px"></div>
-
+ 
   <!-- TABELA COMPARATIVA ANUAL -->
   <div class="sec"><span class="dot" style="background:var(--green)"></span>Tabela Comparativa Anual</div>
   <div class="card" style="margin-bottom:16px">
     <div id="h-annual-table"></div>
   </div>
-
+ 
   <div class="sec"><span class="dot" style="background:var(--green)"></span>Faturamento Anual</div>
   <div class="row c2" style="margin-bottom:16px">
     <div class="card">
@@ -1127,7 +1127,7 @@ select.finput option{background:var(--s2)}
     </div>
     <div style="position:relative;height:250px"><canvas id="h-mo-evol"></canvas></div>
   </div>
-
+ 
   <!-- TABELA MENSAL COMPARATIVA -->
   <div class="sec"><span class="dot" style="background:var(--green)"></span>Tabela Mensal Detalhada</div>
   <div class="card" style="margin-bottom:16px">
@@ -1146,7 +1146,7 @@ select.finput option{background:var(--s2)}
     <div id="h-mo-table"></div>
   </div>
 </div>
-
+ 
 <div class="page" id="page-upload">
   <div style="max-width:640px;margin:0 auto">
     <div class="sec"><span class="dot" style="background:var(--blue)"></span>Carregar Planilha Anual</div>
@@ -1186,7 +1186,7 @@ select.finput option{background:var(--s2)}
     </div>
   </div>
 </div>
-
+ 
 <script>
 window.addEventListener('load', function() {
 // ╔══════════════════════════════════════════════════════════╗
@@ -1196,15 +1196,15 @@ let ST = {};  // computed stats for active year
 const mSt = {b:'fat', brt:'fat'};
 const dSt = {b:'all', brt:'all'};
 let cmMet = 'fat';
-
+ 
 const MONTHS = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
 const WDS    = ['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo'];
-
+ 
 Chart.defaults.color = '#6a7a99';
 Chart.defaults.borderColor = '#232d3f';
 Chart.defaults.font.family = "'Sora',sans-serif";
 Chart.defaults.font.size = 11;
-
+ 
 // ╔══════════════════════════════════════════════════════════╗
 // ║  STATS                                                   ║
 // ╚══════════════════════════════════════════════════════════╝
@@ -1229,19 +1229,19 @@ function computeStats(daily) {
   const tF=daily.reduce((a,d)=>a+d.faturamento,0), tC=daily.reduce((a,d)=>a+d.carros,0);
   return {ms, wdS, wkS, daily, totals:{fat:tF,carros:tC,gastos:daily.reduce((a,d)=>a+d.gastos_caixa,0),ticket:tC>0?tF/tC:0}};
 }
-
+ 
 function recompute() {
   const yr = DB[activeYear] || {};
   ST.b   = computeStats(yr.briote || []);
   ST.brt = computeStats(yr.brt    || []);
 }
-
+ 
 // ╔══════════════════════════════════════════════════════════╗
 // ║  CHARTS                                                  ║
 // ╚══════════════════════════════════════════════════════════╝
 const CH = {};
 function mk(id, cfg) { if(CH[id]) CH[id].destroy(); CH[id]=new Chart(document.getElementById(id).getContext('2d'),cfg); }
-
+ 
 // Chart type registry — keyed by canvas id
 const CT = {};
 function swCT(id, type, btn) {
@@ -1277,10 +1277,10 @@ function swCT(id, type, btn) {
   fn();
 }
 function ctype(id, def='bar') { return CT[id] || def; }
-
+ 
 const fR = v => 'R$ '+v.toLocaleString('pt-BR',{maximumFractionDigits:0});
 const fK = v => v>=1e6?'R$ '+(v/1e6).toFixed(2)+'M':'R$ '+(v/1000).toFixed(0)+'k';
-
+ 
 // KPIs
 function renderKPIs(m, id) {
   const s=ST[m].totals, c=COL(m), lbl=m==='b'?'Briote':'BRT', ic=m==='b'?'🟡':'🟢';
@@ -1290,7 +1290,7 @@ function renderKPIs(m, id) {
     <div class="kpi" style="--kc:${c}"><div class="kico">📉</div><div class="klbl">Gastos de Caixa</div><div class="kval">${fK(s.gastos)}</div><div class="ksub">Média/dia: ${fR(s.gastos/(ST[m].daily.length||1))}</div></div>
     <div class="kpi" style="--kc:${c}"><div class="kico">🎯</div><div class="klbl">Ticket Médio/Carro</div><div class="kval">${fR(s.ticket)}</div><div class="ksub">${ic} ${lbl} · ${activeYear}</div></div>`;
 }
-
+ 
 // Monthly bar
 function swM(m,met,btn){btn.closest('.pills').querySelectorAll('.pill').forEach(p=>p.classList.remove('on'));btn.classList.add('on');mSt[m]=met;renderMo(m);}
 function renderMo(m) {
@@ -1305,7 +1305,7 @@ function renderMo(m) {
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>fT(ctx.parsed.y)}}},
       scales:{x:{grid:{color:'#1d2535'}},y:{grid:{color:'#1a2030'},ticks:{callback:v=>met==='carros'?v:fK(v)}}}}});
 }
-
+ 
 // Weekday table
 function renderWT(m, id) {
   const wd=ST[m].wdS, c=COL(m), maxA=Math.max(...WDS.map(w=>wd[w]?.avg||0));
@@ -1326,7 +1326,7 @@ function renderWT(m, id) {
     tb.appendChild(tr);
   });
 }
-
+ 
 // Radar
 function renderRd(m, id) {
   const wd=ST[m].wdS, c=COL(m);
@@ -1337,7 +1337,7 @@ function renderRd(m, id) {
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:8,padding:7}}},
       scales:{r:{grid:{color:'#232d3f'},ticks:{backdropColor:'transparent',stepSize:25},pointLabels:{color:'#dde3ef',font:{size:10}}}}}});
 }
-
+ 
 // WOM
 function renderWOM(m, id) {
   const wk=ST[m].wkS, c=COL(m);
@@ -1351,7 +1351,7 @@ function renderWOM(m, id) {
     cnt.appendChild(d);
   });
 }
-
+ 
 // Donut
 function renderDn(m, id) {
   const ms=ST[m].ms;
@@ -1366,7 +1366,7 @@ function renderDn(m, id) {
       plugins:{legend:{position:'right',labels:{boxWidth:9,padding:8,font:{size:10}}},
         tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${fR(ctx.parsed)} (${tot>0?(ctx.parsed/tot*100).toFixed(1):0}%)`}}}}});
 }
-
+ 
 // Stack
 function renderSk(m, id) {
   const ms=ST[m].ms;
@@ -1375,7 +1375,7 @@ function renderSk(m, id) {
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:8,padding:7,font:{size:10}}},tooltip:{callbacks:{label:ctx=>`${ctx.dataset.label}: ${fR(ctx.parsed.y)}`}}},
       scales:{x:{stacked:true,grid:{color:'#1d2535'}},y:{stacked:true,grid:{color:'#1a2030'},ticks:{callback:v=>fK(v)}}}}});
 }
-
+ 
 // Daily
 function swD(m,mo,btn){btn.closest('.pills').querySelectorAll('.pill').forEach(p=>p.classList.remove('on'));btn.classList.add('on');dSt[m]=mo;renderDy(m);}
 function renderDy(m) {
@@ -1389,7 +1389,7 @@ function renderDy(m) {
       plugins:{legend:{position:'top',labels:{boxWidth:8,font:{size:10}}},tooltip:{callbacks:{label:ctx=>ctx.datasetIndex===0?fR(ctx.parsed.y):`${ctx.parsed.y} carros`}}},
       scales:{x:{grid:{color:'#1a2030'},ticks:{maxTicksLimit:18,font:{size:9}}},y:{grid:{color:'#1a2030'},ticks:{callback:v=>fK(v)},position:'left'},y2:{grid:{display:false},ticks:{color:'#60a5fa'},position:'right'}}}});
 }
-
+ 
 // Comp KPIs
 function renderCompKPIs() {
   const b=ST.b.totals, brt=ST.brt.totals;
@@ -1404,7 +1404,7 @@ function renderCompKPIs() {
     row.appendChild(d);
   });
 }
-
+ 
 // Comp monthly
 function swCM(met,btn){btn.closest('.pills').querySelectorAll('.pill').forEach(p=>p.classList.remove('on'));btn.classList.add('on');cmMet=met;renderCMo();}
 function renderCMo() {
@@ -1421,7 +1421,7 @@ function renderCMo() {
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{boxWidth:8}},tooltip:{callbacks:{label:ctx=>`${ctx.dataset.label}: ${fT(ctx.parsed.y)}`}}},
       scales:{x:{grid:{color:'#1d2535'}},y:{grid:{color:'#1a2030'},ticks:{callback:v=>met==='carros'?v:fK(v)}}}}});
 }
-
+ 
 // Comp weekday
 function renderCWD() {
   const bWd=ST.b.wdS, bWd2=ST.brt.wdS;
@@ -1440,7 +1440,7 @@ function renderCWD() {
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`${ctx.parsed.y>0?'+':''}${ctx.parsed.y} carros`}}},
       scales:{x:{grid:{color:'#1d2535'}},y:{grid:{color:'#1a2030'},ticks:{callback:v=>`${v>0?'+':''}${v}`}}}}});
 }
-
+ 
 // Comp WOM
 function renderCWOM() {
   const bWk=ST.b.wkS, bWk2=ST.brt.wkS;
@@ -1455,7 +1455,7 @@ function renderCWOM() {
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{boxWidth:8}},tooltip:{callbacks:{label:ctx=>`${ctx.dataset.label}: ${ctx.parsed.y} carros/dia`}}},
       scales:{x:{grid:{color:'#1d2535'}},y:{grid:{color:'#1a2030'},min:50}}}});
 }
-
+ 
 // ╔══════════════════════════════════════════════════════════╗
 // ║  YEAR SELECTOR                                           ║
 // ╚══════════════════════════════════════════════════════════╝
@@ -1468,13 +1468,13 @@ function buildYearSel() {
   fsel.innerHTML = '<option value="all">Todos os anos</option>' + years.map(y=>`<option value="${y}">${y}</option>`).join('');
   renderYearsList();
 }
-
+ 
 function switchYear(y) {
   activeYear = y;
   recompute();
   renderAll();
 }
-
+ 
 function renderYearsList() {
   const el = document.getElementById('years-list');
   const years = Object.keys(DB).sort().reverse();
@@ -1492,14 +1492,14 @@ function renderYearsList() {
     </div>`;
   }).join('');
 }
-
+ 
 function deleteYear(y) {
   if (!confirm(`Excluir todos os dados de ${y}?`)) return;
   delete DB[y];
   if (activeYear === y) activeYear = Object.keys(DB).sort().at(-1);
   recompute(); buildYearSel(); renderAll();
 }
-
+ 
 // ╔══════════════════════════════════════════════════════════╗
 // ║  FORMULÁRIO                                              ║
 // ╚══════════════════════════════════════════════════════════╝
@@ -1515,10 +1515,10 @@ function saveDay() {
   const pix    = parseFloat(document.getElementById('f-pix').value)||0;
   const res    = parseFloat(document.getElementById('f-res').value)||0;
   const gas    = parseFloat(document.getElementById('f-gas').value)||0;
-
+ 
   if (!dateStr) { msg.textContent='❌ Selecione uma data.'; msg.className='fmsg err'; return; }
   if (carros<=0 && fat<=0) { msg.textContent='❌ Informe pelo menos os carros ou o faturamento.'; msg.className='fmsg err'; return; }
-
+ 
   const dt = new Date(dateStr+'T12:00:00');
   const year = String(dt.getFullYear());
   const month = dt.getMonth()+1;
@@ -1526,14 +1526,14 @@ function saveDay() {
   const wdIdx = (dt.getDay()+6)%7;
   const WD = ['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo'];
   const MN = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
-
+ 
   const rec = {
     date: dateStr, month, month_name: MN[month-1], day,
     weekday: WD[wdIdx], weekday_num: wdIdx,
     faturamento: fat, carros, gastos_caixa: gas,
     cash, cc, cd, pix, reservas: res
   };
-
+ 
   if (!DB[year]) DB[year] = {briote:[], brt:[]};
   const arr = DB[year][motel];
   // remove if exists
@@ -1541,19 +1541,19 @@ function saveDay() {
   if (idx>=0) arr.splice(idx,1);
   arr.push(rec);
   arr.sort((a,b)=>a.date.localeCompare(b.date));
-
+ 
   // recompute if this year is active
   if (year === activeYear) { recompute(); renderAll(); }
   buildYearSel();
   renderHist();
 renderManualTable();
-
+ 
   msg.textContent=`✅ Dia ${dateStr} lançado com sucesso no ${motel==='briote'?'Briote':'BRT'}!`;
   msg.className='fmsg ok';
   // clear fields
   ['f-carros','f-fat','f-cash','f-cc','f-cd','f-pix','f-res','f-gas'].forEach(id=>document.getElementById(id).value='');
 }
-
+ 
 function renderManualTable() {
   const yf = document.getElementById('f-year-filter').value;
   const tbody = document.getElementById('manual-tbody');
@@ -1573,7 +1573,7 @@ function renderManualTable() {
     <td><button class="delbtn" onclick="delDay('${d.motel}','${d.date}')">✕</button></td>
   </tr>`).join('');
 }
-
+ 
 function delDay(motel, dateStr) {
   if (!confirm(`Excluir ${dateStr} do ${motel}?`)) return;
   const year = dateStr.slice(0,4);
@@ -1583,7 +1583,7 @@ function delDay(motel, dateStr) {
   renderHist();
 renderManualTable();
 }
-
+ 
 // ╔══════════════════════════════════════════════════════════╗
 // ║  UPLOAD XLSX                                             ║
 // ╚══════════════════════════════════════════════════════════╝
@@ -1616,7 +1616,7 @@ function handleFile(file) {
   };
   reader.readAsArrayBuffer(file);
 }
-
+ 
 function parseSheet(ws, year) {
   const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:null});
   const MP=['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
@@ -1643,7 +1643,7 @@ function parseSheet(ws, year) {
   });
   return res;
 }
-
+ 
 // ╔══════════════════════════════════════════════════════════╗
 // ║  EXPORT HTML                                             ║
 // ╚══════════════════════════════════════════════════════════╝
@@ -1672,7 +1672,7 @@ function exportHTML() {
       a.click();
     });
 }
-
+ 
 // ╔══════════════════════════════════════════════════════════╗
 // ║  NAV                                                     ║
 // ╚══════════════════════════════════════════════════════════╝
@@ -1682,11 +1682,11 @@ function showPage(n,btn){
   document.getElementById('page-'+n).classList.add('active');
   btn.classList.add('active');
 }
-
-
+ 
+ 
 // HISTORICO DATA
 const HYEARS = [2022,2023,2024,2025];
-
+ 
 function histAnnual(motel) {
   const h = HIST[motel];
   return HYEARS.map(yr => {
@@ -1695,7 +1695,7 @@ function histAnnual(motel) {
     return { yr, fat:Math.round(fat), carros, ticket: carros>0?+(fat/carros).toFixed(2):0 };
   });
 }
-
+ 
 // ── Histórico inline — Briote & BRT ──────────────────────────────────────────
 const HYRS = ['2022','2023','2024','2025'];
 const HCOLS = {
@@ -1705,10 +1705,10 @@ const HCOLS = {
   '2025': {border:'#f5c842', bg:'#f5c84230'}
 };
 const HCOLS_BRT = { ...HCOLS, '2025': {border:'#4af0c4', bg:'#4af0c430'} };
-
+ 
 let bHMet = 'fat', brtHMet = 'fat';
 let bHType = 'line', brtHType = 'line';
-
+ 
 function swBH(met,btn){
   btn.closest('.pills').querySelectorAll('.pill').forEach(p=>p.classList.remove('on'));
   btn.classList.add('on'); bHMet=met; renderInlineHist('b');
@@ -1725,7 +1725,7 @@ function swBRTHT(type,btn){
   btn.closest('.pills').querySelectorAll('.pill').forEach(p=>p.classList.remove('on'));
   btn.classList.add('on'); brtHType=type; renderInlineHist('brt');
 }
-
+ 
 function renderInlineHist(pfx) {
   const motel = pfx==='b'?'briote':'brt';
   const met   = pfx==='b'?bHMet:brtHMet;
@@ -1734,7 +1734,7 @@ function renderInlineHist(pfx) {
   const cols  = pfx==='b'?HCOLS:HCOLS_BRT;
   const fmtY  = v => met==='fat'?fK(v): met==='carros'?v:('R$'+v.toFixed(0));
   const fmtTT = v => met==='fat'?fR(v): met==='carros'?(v+' carros'):('R$ '+v.toFixed(2));
-
+ 
   // ── Line or Bar: evolução mensal ─────────────────────
   const isBar = ctype === 'bar';
   const datasets = HYRS.map(yr => {
@@ -1773,7 +1773,7 @@ function renderInlineHist(pfx) {
         y:{grid:{color:'#1a2030'},ticks:{color:'#6a7a99',callback:v=>fmtY(v)}}
       }}
   });
-
+ 
   // ── Bar: faturamento anual ────────────────────
   const annFat   = HYRS.map(yr=>Object.values(h).reduce((s,m)=>s+(m['fat_'+yr]||0),0));
   const annCars  = HYRS.map(yr=>Object.values(h).reduce((s,m)=>s+(m['carros_'+yr]||0),0));
@@ -1781,7 +1781,7 @@ function renderInlineHist(pfx) {
   const barC     = pfx==='b'?'#f5c842':'#4af0c4';
   const barCOld  = pfx==='b'?'#f5c84255':'#4af0c455';
   const barColors= HYRS.map(yr=>yr==='2025'?barC:barCOld);
-
+ 
   mk(pfx+'-hyr-fat', {
     type:'bar',
     data:{labels:HYRS,
@@ -1794,7 +1794,7 @@ function renderInlineHist(pfx) {
         y:{grid:{color:'#1a2030'},ticks:{color:'#6a7a99',callback:v=>fK(v)}}
       }}
   });
-
+ 
   mk(pfx+'-hyr-car', {
     type:'bar',
     data:{labels:HYRS,
@@ -1807,7 +1807,7 @@ function renderInlineHist(pfx) {
         y:{grid:{color:'#1a2030'},ticks:{color:'#6a7a99'}}
       }}
   });
-
+ 
   // ── Line: ticket mensal por ano ───────────────
   const tktDs = HYRS.map(yr=>({
     label: yr,
@@ -1835,12 +1835,12 @@ function renderInlineHist(pfx) {
       }}
   });
 }
-
+ 
 function renderInlineHists() {
   renderInlineHist('b');
   renderInlineHist('brt');
 }
-
+ 
 function renderHistKPIs() {
   ['b','brt'].forEach(m => {
     const motel = m==='b'?'briote':'brt', c=COL(m);
@@ -1860,7 +1860,7 @@ function renderHistKPIs() {
     }).join('');
   });
 }
-
+ 
 function renderAnnualTable() {
   const annB = histAnnual('briote'), annBRT = histAnnual('brt');
   const colB = '#f5c842', colBRT = '#4af0c4';
@@ -1893,23 +1893,23 @@ function renderAnnualTable() {
   html += '</tbody></table>';
   document.getElementById('h-annual-table').innerHTML = html;
 }
-
+ 
 let hTblMet='fat', hTblMot='briote';
 function swHTbl(met,btn){btn.closest('.pills').querySelectorAll('.pill').forEach(p=>p.classList.remove('on'));btn.classList.add('on');hTblMet=met;renderMonthlyTable();}
 function swHTblMot(mot,btn){btn.closest('.pills').querySelectorAll('.pill').forEach(p=>p.classList.remove('on'));btn.classList.add('on');hTblMot=mot;renderMonthlyTable();}
-
+ 
 function renderMonthlyTable() {
   const fmt = v => hTblMet==='fat'?fR(v):hTblMet==='carros'?v.toLocaleString('pt-BR'):'R$ '+v.toFixed(2);
   const palettes = {2022:'#a78bfa',2023:'#60a5fa',2024:'#ff6b35',2025:'#f5c842'};
   const palBRT = {2022:'#a78bfa',2023:'#60a5fa',2024:'#ff6b35',2025:'#4af0c4'};
-
+ 
   const getVal = (motel, mo, yr) => {
     const d = HIST[motel][mo];
     return d?(d[hTblMet+'_'+yr]||0):0;
   };
-
+ 
   let html = '';
-
+ 
   if (hTblMot === 'both') {
     // Comparativo: colunas = anos, linhas = meses, sublinhas = B e BRT
     html = `<table class="wt" style="width:100%"><thead><tr>
@@ -1959,17 +1959,17 @@ function renderMonthlyTable() {
     html += `<td style="color:${tVar>=0?'var(--green)':'var(--red)'}">${tVar!==null?(parseFloat(tVar)>=0?'▲':'▼')+Math.abs(tVar)+'%':'—'}</td>`;
     html += '</tr></tbody></table>';
   }
-
+ 
   document.getElementById('h-mo-table').innerHTML = html;
 }
-
+ 
 function renderHistAnnualCharts() {
   ['briote','brt'].forEach(motel => {
     const m = motel==='briote'?'b':'brt', c=COL(m);
     const ann = histAnnual(motel);
     const cols = ann.map((_,i)=>i===3?c:c+'55');
     const bcols = ann.map((_,i)=>i===3?c:c+'99');
-
+ 
     const mkAnn = (id, data, tooltipFn, yTickFn) => {
       const t = ctype(id,'bar');
       const ds = t==='bar'
@@ -1980,13 +1980,13 @@ function renderHistAnnualCharts() {
           tooltip:{callbacks:{label:ctx=>tooltipFn(ctx.parsed.y)}}},
           scales:{x:{grid:{color:'#1d2535'}},y:{grid:{color:'#1a2030'},ticks:{callback:yTickFn}}}}});
     };
-
+ 
     mkAnn('h-'+m+'-fat-yr', ann.map(a=>a.fat),   v=>fR(v),                   v=>fK(v));
     mkAnn('h-'+m+'-car-yr', ann.map(a=>a.carros), v=>v+' carros',             v=>v);
     mkAnn('h-'+m+'-tck-yr', ann.map(a=>a.ticket), v=>'R$ '+v.toFixed(2),      v=>'R$ '+v);
   });
 }
-
+ 
 let hcMet='fat';
 function swHC(met,btn){btn.closest('.pills').querySelectorAll('.pill').forEach(p=>p.classList.remove('on'));btn.classList.add('on');hcMet=met;renderHistComp();}
 function renderHistComp() {
@@ -2004,7 +2004,7 @@ function renderHistComp() {
     plugins:{legend:{position:'top',labels:{boxWidth:9}},tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+fT(ctx.parsed.y)}}},
     scales:{x:{grid:{color:'#1d2535'}},y:{grid:{color:'#1a2030'},ticks:{callback:v=>hcMet==='fat'?fK(v):hcMet==='carros'?v:'R$ '+v}}}}});
 }
-
+ 
 let hmMet='fat', hmMotel='briote';
 function swHM(met,btn){btn.closest('.pills').querySelectorAll('.pill').forEach(p=>p.classList.remove('on'));btn.classList.add('on');hmMet=met;renderHistMoEvol();}
 function swHMot(motel,btn){btn.closest('.pills').querySelectorAll('.pill').forEach(p=>p.classList.remove('on'));btn.classList.add('on');hmMotel=motel;renderHistMoEvol();}
@@ -2024,7 +2024,7 @@ function renderHistMoEvol() {
     plugins:{legend:{position:'top',labels:{boxWidth:9,font:{size:10}}},tooltip:{callbacks:{label:ctx=>ctx.parsed.y?ctx.dataset.label+': '+fT(ctx.parsed.y):null}}},
     scales:{x:{grid:{color:'#1d2535'}},y:{grid:{color:'#1a2030'},ticks:{callback:v=>hmMet==='fat'?fK(v):hmMet==='carros'?v:'R$ '+v}}}}});
 }
-
+ 
 function renderHist() {
   renderHistKPIs();
   renderAnnualTable();
@@ -2033,7 +2033,7 @@ function renderHist() {
   renderHistMoEvol();
   renderMonthlyTable();
 }
-
+ 
 // ╔══════════════════════════════════════════════════════════╗
 // ║  RENDER ALL                                              ║
 // ╚══════════════════════════════════════════════════════════╝
@@ -2043,7 +2043,7 @@ function renderAll() {
   renderCompKPIs(); renderCMo(); renderCWD(); renderDn('b','c-db'); renderDn('brt','c-dbrt'); renderCWOM();
   renderInlineHists();
 }
-
+ 
 // ╔══════════════════════════════════════════════════════════╗
 // ║  INIT                                                    ║
 // ╚══════════════════════════════════════════════════════════╝
