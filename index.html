@@ -606,14 +606,19 @@ function parseSheetData(rows, year) {
 }
 
 function jsonp(url) {
-  return new Promise((resolve, reject) => {
-    const cb = '_cb_' + Math.random().toString(36).slice(2);
-    window[cb] = data => { delete window[cb]; script.remove(); resolve(data); };
-    const script = document.createElement('script');
-    script.onerror = () => { delete window[cb]; script.remove(); reject(new Error('Erro ao carregar. Verifique se o Apps Script está implantado.')); };
-    script.src = url + '?callback=' + cb;
-    document.head.appendChild(script);
-  });
+  return fetch(url)
+    .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .catch(() => {
+      // fallback to JSONP if fetch fails (CORS)
+      return new Promise((resolve, reject) => {
+        const cb = '_cb_' + Math.random().toString(36).slice(2);
+        window[cb] = data => { delete window[cb]; scr.remove(); resolve(data); };
+        const scr = document.createElement('script');
+        scr.onerror = () => { delete window[cb]; scr.remove(); reject(new Error('Erro ao carregar. Verifique se o Apps Script está implantado.')); };
+        scr.src = url + '?callback=' + cb;
+        document.head.appendChild(scr);
+      });
+    });
 }
 
 async function iniciar() {
