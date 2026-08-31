@@ -1197,10 +1197,7 @@ let cmMet = 'fat';
 const MONTHS = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
 const WDS    = ['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo'];
 
-Chart.defaults.color = '#6a7a99';
-Chart.defaults.borderColor = '#232d3f';
-Chart.defaults.font.family = "'Sora',sans-serif";
-Chart.defaults.font.size = 11;
+// Chart.defaults set in waitAndStart()
 
 // ╔══════════════════════════════════════════════════════════╗
 // ║  STATS                                                   ║
@@ -2047,7 +2044,18 @@ function renderAll() {
 // Set today as default date in form
 document.getElementById('f-date').value = new Date().toISOString().slice(0,10);
 // loading via Google Sheets...
-iniciar();
+function waitAndStart() {
+  if (typeof Chart === 'undefined') {
+    setTimeout(waitAndStart, 50);
+  } else {
+    Chart.defaults.color = '#6a7a99';
+    Chart.defaults.borderColor = '#232d3f';
+    Chart.defaults.font.family = "'Sora',sans-serif";
+    Chart.defaults.font.size = 11;
+    iniciar();
+  }
+}
+waitAndStart();
 </script>
 </body>
 </html>
