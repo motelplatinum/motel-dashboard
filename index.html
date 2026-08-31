@@ -582,12 +582,15 @@ function parseSheetData(rows, year) {
     if (!curMonth) continue;
     // col[1] deve ser o número do dia (1-31)
     // Pula linhas onde col[0] tem texto não-numérico (ex: "previsão", "BRIOTE", etc)
-    const col0 = String(row[0]||'').trim();
-    if (col0 !== '' && isNaN(parseFloat(col0))) continue;
     // col[1] pode ser número (BRT) ou data ISO "2026-01-01T..." (BRIOTE)
     let dayNum, monthNum = curMonthNum;
     const col1 = String(row[1]||'');
-    if (col1.includes('T') && col1.includes('-')) {
+    // Pula linhas onde col[1] não é data nem número (ex: "BRIOTE", "Mercado", etc)
+    const col0 = String(row[0]||'').trim();
+    const col1IsDate = col1.includes('T') && col1.includes('-');
+    const col1IsNum = !isNaN(parseInt(col1)) && col1.trim() !== '';
+    if (!col1IsDate && !col1IsNum) continue;
+    if (col1IsDate) {
       // data ISO: extrai ano, mês e dia diretamente
       const parts = col1.split('T')[0].split('-');
       monthNum = parseInt(parts[1]);
