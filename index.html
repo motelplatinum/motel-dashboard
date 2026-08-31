@@ -569,7 +569,6 @@ const SHEETS = {
 const MONTHS_PTL = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
 const WDL = ['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo'];
 
-window.addEventListener('load', function() {
 document.getElementById('f-date').value = new Date().toISOString().slice(0,10);
 
 function parseSheetData(rows, year) {
@@ -639,7 +638,7 @@ async function iniciar() {
   document.getElementById('sb-loading').remove();
 }
 
-});</script>
+</script>
 <style>
 :root{--bg:#080b0f;--s1:#0f1318;--s2:#161c26;--s3:#1d2535;--border:#232d3f;--text:#dde3ef;--muted:#6a7a99;--briote:#f5c842;--brt:#4af0c4;--accent:#ff6b35;--blue:#60a5fa;--green:#22c55e;--red:#ef4444;--purple:#a78bfa}
 *{margin:0;padding:0;box-sizing:border-box}
@@ -1187,7 +1186,6 @@ select.finput option{background:var(--s2)}
 </div>
 
 <script>
-window.addEventListener('load', function() {
 // ╔══════════════════════════════════════════════════════════╗
 // ║  ESTADO                                                  ║
 // ╚══════════════════════════════════════════════════════════╝
@@ -2049,19 +2047,7 @@ function renderAll() {
 // Set today as default date in form
 document.getElementById('f-date').value = new Date().toISOString().slice(0,10);
 // loading via Google Sheets...
-// ── Expõe funções ao escopo global (necessário para onclick) ─────────────
-window.showPage = showPage;
-window.swM = swM; window.swD = swD; window.swCT = swCT; window.swCM = swCM;
-window.swBH = swBH; window.swBRTH = swBRTH; window.swBHT = swBHT; window.swBRTHT = swBRTHT;
-window.swHC = swHC; window.swHM = swHM; window.swHMot = swHMot;
-window.swHTbl = swHTbl; window.swHTblMot = swHTblMot;
-window.switchYear = switchYear; window.deleteYear = deleteYear;
-window.saveDay = saveDay; window.delDay = delDay;
-window.renderManualTable = renderManualTable;
-window.handleFile = handleFile; window.handleDrop = handleDrop;
-window.exportHTML = exportHTML;
 iniciar();
-}); // window.load
 </script>
 </body>
 </html>
