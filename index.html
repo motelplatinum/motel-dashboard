@@ -584,7 +584,14 @@ function parseSheetData(rows, year) {
     // Pula linhas onde col[0] tem texto não-numérico (ex: "previsão", "BRIOTE", etc)
     const col0 = String(row[0]||'').trim();
     if (col0 !== '' && isNaN(parseFloat(col0))) continue;
-    const dayNum = parseInt(row[1]);
+    // col[1] pode ser número (BRT) ou data ISO "2026-01-01T..." (BRIOTE)
+    let dayNum = parseInt(row[1]);
+    if (!dayNum || isNaN(dayNum)) {
+      // tenta extrair dia de data ISO
+      const s = String(row[1]||'');
+      const m = s.match(/T\d\d:\d\d:\d\d/) ? s.split('T')[0].split('-')[2] : null;
+      dayNum = m ? parseInt(m) : 0;
+    }
     if (!dayNum || dayNum < 1 || dayNum > 31) continue;
     const dt = new Date(year, curMonthNum-1, dayNum);
     if (dt.getMonth() !== curMonthNum-1) continue;
