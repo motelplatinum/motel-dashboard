@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -639,7 +640,6 @@ async function iniciar() {
   document.getElementById('sb-loading').remove();
 }
  
-iniciar();
 });</script>
 <style>
 :root{--bg:#080b0f;--s1:#0f1318;--s2:#161c26;--s3:#1d2535;--border:#232d3f;--text:#dde3ef;--muted:#6a7a99;--briote:#f5c842;--brt:#4af0c4;--accent:#ff6b35;--blue:#60a5fa;--green:#22c55e;--red:#ef4444;--purple:#a78bfa}
@@ -2050,6 +2050,7 @@ function renderAll() {
 // Set today as default date in form
 document.getElementById('f-date').value = new Date().toISOString().slice(0,10);
 // loading via Google Sheets...
+iniciar();
 }); // window.load
 </script>
 </body>
