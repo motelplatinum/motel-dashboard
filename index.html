@@ -1188,14 +1188,10 @@ select.finput option{background:var(--s2)}
 </div>
 
 <script>
-// ╔══════════════════════════════════════════════════════════╗
-// ║  DADOS EMBUTIDOS — gerado automaticamente ao exportar    ║
-// ╚══════════════════════════════════════════════════════════╝
-
+window.addEventListener('load', function() {
 // ╔══════════════════════════════════════════════════════════╗
 // ║  ESTADO                                                  ║
 // ╚══════════════════════════════════════════════════════════╝
-// activeYear definido no topo
 let ST = {};  // computed stats for active year
 const mSt = {b:'fat', brt:'fat'};
 const dSt = {b:'all', brt:'all'};
@@ -2054,6 +2050,7 @@ function renderAll() {
 // Set today as default date in form
 document.getElementById('f-date').value = new Date().toISOString().slice(0,10);
 // loading via Google Sheets...
+}); // window.load
 </script>
 </body>
 </html>
