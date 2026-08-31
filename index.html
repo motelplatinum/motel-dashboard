@@ -585,16 +585,20 @@ function parseSheetData(rows, year) {
     const col0 = String(row[0]||'').trim();
     if (col0 !== '' && isNaN(parseFloat(col0))) continue;
     // col[1] pode ser número (BRT) ou data ISO "2026-01-01T..." (BRIOTE)
-    let dayNum = parseInt(row[1]);
-    if (!dayNum || isNaN(dayNum)) {
-      // tenta extrair dia de data ISO
-      const s = String(row[1]||'');
-      const m = s.match(/T\d\d:\d\d:\d\d/) ? s.split('T')[0].split('-')[2] : null;
-      dayNum = m ? parseInt(m) : 0;
+    let dayNum, monthNum = curMonthNum;
+    const col1 = String(row[1]||'');
+    if (col1.includes('T') && col1.includes('-')) {
+      // data ISO: extrai ano, mês e dia diretamente
+      const parts = col1.split('T')[0].split('-');
+      monthNum = parseInt(parts[1]);
+      dayNum = parseInt(parts[2]);
+    } else {
+      dayNum = parseInt(row[1]);
     }
     if (!dayNum || dayNum < 1 || dayNum > 31) continue;
-    const dt = new Date(year, curMonthNum-1, dayNum);
-    if (dt.getMonth() !== curMonthNum-1) continue;
+    const dt = new Date(year, monthNum-1, dayNum);
+    if (dt.getMonth() !== monthNum-1) continue;
+    curMonthNum = monthNum;
     const n = v => { const f = parseFloat(String(v||0).replace(',','.')); return isNaN(f)?0:f; };
     const carros = n(row[10]), fat = n(row[9]);
     // Pula dias não preenchidos
