@@ -139,6 +139,7 @@ select.finput option{background:var(--s2)}
   <button class="ntab tb" onclick="showPage('brt',this)">🟢 BRT</button>
   <button class="ntab tc" onclick="showPage('comp',this)">⚡ Comparativo</button>
   <button class="ntab th" onclick="showPage('hist',this)">📈 Histórico</button>
+  <button class="ntab tc" onclick="showPage('total',this)">Σ Total Grupo</button>
   <button class="ntab tf" onclick="showPage('form',this)">✏️ Lançar Dia</button>
   <button class="ntab tu" onclick="showPage('upload',this)">📂 Carregar Planilha</button>
   <div class="nav-right">
@@ -191,39 +192,6 @@ select.finput option{background:var(--s2)}
     </div>
     <div style="position:relative;height:190px"><canvas id="b-dy"></canvas></div>
   </div>
-  <!-- ── Evolução Histórica Briote ── -->
-  <div class="sec" style="margin-top:18px"><span class="dot"></span>Evolução Histórica — Mês a Mês</div>
-  <div class="card" style="margin-bottom:14px">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:11px;flex-wrap:wrap;gap:8px">
-      <div class="ctit" style="margin-bottom:0">2022 · 2023 · 2024 · 2025 comparados</div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap">
-        <div class="pills" id="bHp" style="margin-bottom:0">
-          <button class="pill on" onclick="swBH('fat',this)">Faturamento</button>
-          <button class="pill" onclick="swBH('carros',this)">Carros</button>
-          <button class="pill" onclick="swBH('ticket',this)">Ticket Médio</button>
-        </div>
-        <div class="pills" id="bHtp" style="margin-bottom:0">
-          <button class="pill on" onclick="swBHT('line',this)" title="Linha">〜</button>
-          <button class="pill" onclick="swBHT('bar',this)" title="Coluna">▐▐</button>
-        </div>
-      </div>
-    </div>
-    <div style="position:relative;height:240px"><canvas id="b-hev"></canvas></div>
-  </div>
-  <div class="row c2" style="margin-bottom:14px">
-    <div class="card">
-      <div class="ctit">Faturamento Anual — Briote</div>
-      <div style="position:relative;height:180px"><canvas id="b-hyr-fat"></canvas></div>
-    </div>
-    <div class="card">
-      <div class="ctit">Carros Anuais — Briote</div>
-      <div style="position:relative;height:180px"><canvas id="b-hyr-car"></canvas></div>
-    </div>
-  </div>
-  <div class="card" style="margin-bottom:4px">
-    <div class="ctit" style="margin-bottom:13px">Ticket Médio Mensal por Ano — Briote</div>
-    <div style="position:relative;height:200px"><canvas id="b-hyr-tkt"></canvas></div>
-  </div>
 </div>
 
 <!-- ═══ BRT ═══════════════════════════════════════════════════ -->
@@ -270,42 +238,47 @@ select.finput option{background:var(--s2)}
     </div>
     <div style="position:relative;height:190px"><canvas id="brt-dy"></canvas></div>
   </div>
-  <!-- ── Evolução Histórica BRT ── -->
-  <div class="sec" style="margin-top:18px"><span class="dot" style="background:var(--brt)"></span>Evolução Histórica — Mês a Mês</div>
-  <div class="card" style="margin-bottom:14px">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:11px;flex-wrap:wrap;gap:8px">
-      <div class="ctit" style="margin-bottom:0">2022 · 2023 · 2024 · 2025 comparados</div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap">
-        <div class="pills" id="brtHp" style="margin-bottom:0">
-          <button class="pill on g" onclick="swBRTH('fat',this)">Faturamento</button>
-          <button class="pill g" onclick="swBRTH('carros',this)">Carros</button>
-          <button class="pill g" onclick="swBRTH('ticket',this)">Ticket Médio</button>
-        </div>
-        <div class="pills" id="brtHtp" style="margin-bottom:0">
-          <button class="pill on g" onclick="swBRTHT('line',this)" title="Linha">〜</button>
-          <button class="pill g" onclick="swBRTHT('bar',this)" title="Coluna">▐▐</button>
-        </div>
-      </div>
-    </div>
-    <div style="position:relative;height:240px"><canvas id="brt-hev"></canvas></div>
-  </div>
-  <div class="row c2" style="margin-bottom:14px">
-    <div class="card">
-      <div class="ctit">Faturamento Anual — BRT</div>
-      <div style="position:relative;height:180px"><canvas id="brt-hyr-fat"></canvas></div>
-    </div>
-    <div class="card">
-      <div class="ctit">Carros Anuais — BRT</div>
-      <div style="position:relative;height:180px"><canvas id="brt-hyr-car"></canvas></div>
-    </div>
-  </div>
-  <div class="card" style="margin-bottom:4px">
-    <div class="ctit" style="margin-bottom:13px">Ticket Médio Mensal por Ano — BRT</div>
-    <div style="position:relative;height:200px"><canvas id="brt-hyr-tkt"></canvas></div>
-  </div>
 </div>
 
 <!-- ═══ COMPARATIVO ══════════════════════════════════════════ -->
+<div class="page" id="page-total">
+  <div class="sec"><span class="dot" style="background:var(--accent)"></span>Total do Grupo — <span id="t-year-lbl"></span> (Briote + BRT)</div>
+  <div class="kgrid" id="t-kpis"></div>
+  <div class="card" style="margin-bottom:14px">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:11px">
+      <div class="ctit" style="margin-bottom:0">Mês a mês — Briote + BRT</div>
+      <div class="pills" style="margin-bottom:0">
+        <button class="pill on" onclick="swTMo('fat',this)">Faturamento</button>
+        <button class="pill" onclick="swTMo('carros',this)">Carros</button>
+        <button class="pill" onclick="swTMo('ticket',this)">Ticket Médio</button>
+      </div>
+    </div>
+    <div style="position:relative;height:250px"><canvas id="t-mo"></canvas></div>
+  </div>
+  <div class="card" style="margin-bottom:22px"><div class="ctit">Tabela mensal — ano selecionado</div><div id="t-mo-table" style="overflow-x:auto"></div></div>
+
+  <div class="sec"><span class="dot" style="background:var(--accent)"></span>Total do Grupo — Ano a Ano</div>
+  <div class="card yf-box" style="margin-bottom:16px"></div>
+  <div class="card" style="margin-bottom:16px"><div id="t-annual-table" style="overflow-x:auto"></div></div>
+  <div class="row c2" style="margin-bottom:14px">
+    <div class="card"><div class="ctit">Faturamento anual (Briote + BRT)</div><div style="position:relative;height:230px"><canvas id="t-yr-fat"></canvas></div></div>
+    <div class="card"><div class="ctit">Carros anuais (Briote + BRT)</div><div style="position:relative;height:230px"><canvas id="t-yr-car"></canvas></div></div>
+  </div>
+  <div class="row c2" style="margin-bottom:14px">
+    <div class="card"><div class="ctit">Ticket médio anual do grupo</div><div style="position:relative;height:230px"><canvas id="t-yr-tkt"></canvas></div></div>
+    <div class="card">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:11px">
+        <div class="ctit" style="margin-bottom:0">Mês a mês por ano</div>
+        <div class="pills" style="margin-bottom:0">
+          <button class="pill on" onclick="swTYM('fat',this)">Fat.</button>
+          <button class="pill" onclick="swTYM('carros',this)">Carros</button>
+        </div>
+      </div>
+      <div style="position:relative;height:230px"><canvas id="t-yr-mo"></canvas></div>
+    </div>
+  </div>
+</div>
+
 <div class="page" id="page-comp">
   <div class="sec"><span class="dot" style="background:var(--accent)"></span>Totais Consolidados (Briote + BRT)</div>
   <div class="kgrid" id="comp-total-kpis" style="margin-bottom:18px"></div>
@@ -402,6 +375,7 @@ select.finput option{background:var(--s2)}
 
 <!-- HISTORICO -->
 <div class="page" id="page-hist">
+  <div class="card yf-box" style="margin-bottom:16px"></div>
   <div class="sec"><span class="dot" style="background:var(--green)"></span>Evolução Anual — desde a inauguração</div>
 
   <!-- KPI CARDS - 3 por ano: fat, carros, ticket -->
@@ -730,14 +704,6 @@ function swCT(id, type, btn) {
     'c-wom':       ()=>renderCWOM(),
     'h-comp-yr':   ()=>renderHistComp(),
     'h-mo-evol':   ()=>renderHistMoEvol(),
-    'b-hev':       ()=>renderInlineHist('b'),
-    'brt-hev':     ()=>renderInlineHist('brt'),
-    'b-hyr-fat':   ()=>renderInlineHist('b'),
-    'b-hyr-car':   ()=>renderInlineHist('b'),
-    'b-hyr-tkt':   ()=>renderInlineHist('b'),
-    'brt-hyr-fat': ()=>renderInlineHist('brt'),
-    'brt-hyr-car': ()=>renderInlineHist('brt'),
-    'brt-hyr-tkt': ()=>renderInlineHist('brt'),
   };
   Object.keys(CT).filter(k=>k.startsWith('h-b-')||k.startsWith('h-brt-')).forEach(k=>{
     renderMap[k] = renderMap[k] || (()=>renderHistAnnualCharts());
@@ -1169,11 +1135,45 @@ function showPage(n,btn){
 
 // HISTORICO DATA — calculado a partir do DB
 const HISTM = {"briote":{"2008":[[3008,219381.5],[2947,208619.5],[3147,231191.5],[2768,204588.0],[3235,237184.25],[3022,223026.0],[3434,250612.0],[3732,288617.0],[3582,293923.0],[3827,318581.0],[3614,295215.5],[4191,348069.0]],"2009":[[3833,318096.0],[3277,265641.1],[3630,296685.0],[3141,228703.79],[3464,283857.5],[3495,287276.5],[3713,305759.5],[3861,312426.0],[3722,304615.0],[4056,333412.5],[3878,341556.5],[4200,378224.5]],"2010":[[3899,352015.5],[3568,320942.5],[3751,329851.0],[3466,305317.4],[3658,323360.0],[3814,339716.2],[4299,380606.8],[4062,366570.6],[4105,361613.4],[4423,395779.2],[4093,374262.3],[4573,422548.4]],"2011":[[4348,406647.8],[3740,349182.4],[3918,377923.9],[4052,354413.0],[3823,354986.5],[4087,385057.9],[4262,398251.5],[4024,381033.9],[4150,390449.5],[4296,402677.5],[4146,384085.0],[4804,478945.1]],"2012":[[4347,430373.9],[3990,397742.8],[4235,419425.66],[3512,350867.0],[3989,387001.0],[4239,424229.3],[4175,405868.5],[4250,415070.0],[4249,424986.1],[4435,442730.5],[4449,445051.0],[4846,497357.85]],"2013":[[4288,449756.0],[3606,379987.0],[4170,436835.5],[3069,314464.21],[3601,365906.7],[3813,398096.0],[3679,393640.91],[3998,424113.0],[3882,401465.38],[3935,363157.24],[4075,431410.82],[4393,487558.5]],"2014":[[4129,460902.0],[3741,414436.0],[3805,421214.0],[3182,352579.49],[3760,408598.64],[3805,404689.85],[3806,412885.8],[4197,447025.6],[4019,441014.0],[4342,470259.0],[4151,462981.0],[4341,517361.0]],"2015":[[4276,513563.0],[3620,417845.0],[3873,444258.0],[3513,401836.0],[3707,417436.0],[3769,429584.0],[3841,450502.0],[3620,446421.2],[3414,429833.9],[3392,429133.0],[3019,388326.5],[3444,443745.0]],"2016":[[3148,389019.5],[2832,347371.5],[2864,349210.0],[2608,331715.38],[2673,318048.0],[2102,274849.96],[2843,361270.1],[2578,324550.2],[2606,329842.52],[2744,365536.46],[2615,336617.0],[3057,396641.3]],"2017":[[2681,350879.8],[2442,314557.0],[2651,345289.0],[2354,307077.0],[2395,303112.0],[2446,310814.0],[2533,327219.5],[2440,314835.5],[2467,332774.4],[2365,323043.5],[2270,300583.0],[2655,356805.5]],"2018":[[2299,321830.5],[1882,263423.4],[2342,318493.33],[1882,259742.25],[1788,239449.99],[2195,300941.74],[2110,293863.22],[2072,283181.9],[2094,291775.96],[2240,309836.3],[2074,327239.5],[2513,355167.64]],"2019":[[2257,312872.46],[2033,279551.15],[2221,305814.86],[1839,251779.25],[1793,260353.33],[2206,304359.45],[1946,264029.6],[2080,294034.5],[2233,291266.15],[2223,280957.8],[2293,328232.77],[2259,332183.64]],"2020":[[2047,299925.0],[1925,281172.6],[1180,171490.3],[425,66601.5],[1490,228787.0],[1859,293058.08],[1956,309974.94],[2132,338563.4],[2271,355381.2],[2506,391043.42],[2343,364028.13],[2630,424892.3]],"2021":[[2469,396101.6],[2040,330115.2],[2034,344232.4],[2269,375818.8],[2331,387329.75],[2394,391251.5],[2564,439316.3],[2345,407597.09],[2519,442377.03],[2586,446470.22],[2483,432309.64],[2990,496730.65]],"2022":[[2637,436977.45],[2437,409118.4],[2462,415596.79],[2264,408771.03],[2192,390317.34],[2352,430051.69],[2541,452333.4],[2222,391710.25],[2420,435684.5],[2555,459880.1],[2411,446532.82],[2823,531666.85]]},"brt":{"2015":[null,null,null,null,null,null,null,null,[456,53357.1],[1182,155266.0],[1484,206384.7],[1531,209743.0]],"2016":[[1453,192751.8],[1321,168923.5],[1420,182649.0],[1559,203732.0],[1494,191925.0],[1628,205270.0],[1655,212965.0],[1517,195155.4],[1595,206512.0],[1814,236115.0],[1759,229520.5],[2057,279086.0]],"2017":[[1915,251515.0],[1734,231520.0],[1953,257259.0],[1923,246007.0],[1900,241795.6],[2061,270629.6],[2071,267754.0],[2123,274234.0],[2110,282275.5],[2044,274669.5],[1915,260891.0],[2296,321764.0]],"2018":[[2041,269333.0],[1860,253895.49],[2244,300973.5],[2150,293204.29],[1804,241584.6],[2305,316319.24],[2106,287792.13],[2129,282469.54],[2165,295636.9],[2200,296557.82],[1995,274483.1],[2461,343931.79]],"2019":[[2215,304583.16],[2157,297053.04],[2162,299858.6],[2227,309793.11],[2111,269317.8],[2325,322138.0],[2114,290015.11],[2262,302458.0],[2062,280568.6],[2323,296832.0],[2543,358110.2],[2565,379306.93]],"2020":[[2360,347122.0],[2193,318150.15],[1775,257143.5],[1909,295142.89],[2084,325481.85],[2291,361005.55],[2387,370722.01],[2579,407980.25],[2728,428681.41],[3053,483788.55],[2787,432387.55],[3059,491225.35]],"2021":[[2704,428453.95],[2484,398147.28],[2461,411733.5],[2628,437071.0],[2718,439722.84],[2669,431145.0],[2905,475763.9],[2705,456276.56],[2721,456248.25],[2883,482619.9],[2707,446040.95],[3159,520526.8]],"2022":[[2728,452377.61],[2693,444106.44],[2706,459736.9],[2755,480816.5],[2428,436150.08],[2494,445476.37],[2730,496281.2],[2453,437808.24],[2515,447974.54],[2758,490745.96],[2485,452629.5],[2867,565480.8]]}};
-function getHYEARS() {
+function allHYEARS() {
   const ys = new Set(Object.keys(DB).map(Number));
   ['briote','brt'].forEach(m=>Object.keys(HISTM[m]||{}).forEach(y=>ys.add(Number(y))));
   return [...ys].sort((a,b)=>a-b);
 }
+// Seleção de anos do Histórico: null = padrão (últimos 5), Set = escolha do usuário
+let hSel = null;
+function getHYEARS() {
+  const base = allHYEARS();
+  if (hSel === null) return base.slice(-5);
+  const f = base.filter(y=>hSel.has(y));
+  return f.length ? f : base.slice(-1);
+}
+function hSetYears(mode) {
+  const base = allHYEARS();
+  hSel = mode==='all' ? new Set(base) : new Set(base.slice(-mode));
+  renderHist(); renderTotal();
+}
+function hToggleYear(y) {
+  const cur = new Set(getHYEARS());
+  if (cur.has(y)) { if (cur.size>1) cur.delete(y); } else cur.add(y);
+  hSel = cur;
+  renderHist(); renderTotal();
+}
+function buildHistFilter() {
+  const html = (()=>{
+  const sel = new Set(getHYEARS()), base = allHYEARS();
+  const chip = (on,label,fn,extra='') => `<button class="pill${on?' on':''}" ${extra} onclick="${fn}">${label}</button>`;
+  return `<div style="font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Anos comparados</div>
+    <div class="pills" style="margin-bottom:6px">
+      ${chip(sel.size===base.length,'Todos',"hSetYears('all')")}
+      ${chip(false,'Últimos 5',"hSetYears(5)")}
+      ${chip(false,'Últimos 3',"hSetYears(3)")}
+    </div>
+    <div class="pills" style="margin-bottom:0;flex-wrap:wrap">${base.map(y=>chip(sel.has(y),y,`hToggleYear(${y})`)).join('')}</div>`;
+  })();
+  document.querySelectorAll('.yf-box').forEach(el=>{ el.innerHTML = html; });
+}
+function getHYEARS_ALL(){return allHYEARS();}
 // Dias reais (planilha diária) ou registros mensais embutidos (anos antigos)
 function histDays(yr, motel) {
   const real = DB[String(yr)]?.[motel];
@@ -1197,11 +1197,11 @@ function histAnnual(motel) {
 // ── Cores dinâmicas por ano (funciona para qualquer ano) ──
 const HPAL=['#6a7a99','#a78bfa','#60a5fa','#ff6b35','#e879f9','#94a3b8'];
 function hColor(yr,motel){
-  const ys=getHYEARS(); const i=ys.indexOf(Number(yr));
+  const ys=allHYEARS(); const i=ys.indexOf(Number(yr));
   if(i===ys.length-1||i<0) return motel==='brt'?'#4af0c4':'#f5c842';
   return HPAL[i%HPAL.length];
 }
-function hLast(yr){const ys=getHYEARS();return Number(yr)===ys[ys.length-1];}
+function hLast(yr){const ys=allHYEARS();return Number(yr)===ys[ys.length-1];}
 function mkPal(motel){return new Proxy({},{get:(t,k)=>{const c=hColor(k,motel);return typeof k==='string'&&/^\d+$/.test(k)?{border:c,bg:c+'30'}:undefined;}});}
 const HCOLS=mkPal('briote'), HCOLS_BRT=mkPal('brt');
 function mkPalStr(motel){return new Proxy({},{get:(t,k)=>hColor(k,motel)});}
@@ -1365,7 +1365,7 @@ function renderHistKPIs() {
         <div class="ksub">🚗 ${a.carros.toLocaleString('pt-BR')} carros</div>
         <div style="font-family:'Bebas Neue',cursive;font-size:1.1rem;color:${isLast?c:'#a78bfa'};margin-top:4px;letter-spacing:1px">🎯 ${fR(a.ticket)} / carro</div>
       </div>`;
-    }).slice(-5).join('');
+    }).join('');
   });
 }
 
@@ -1549,12 +1549,121 @@ function renderHistMoEvol() {
 }
 
 function renderHist() {
+  buildHistFilter();
   renderHistKPIs();
   renderAnnualTable();
   renderHistAnnualCharts();
   renderHistComp();
   renderHistMoEvol();
   renderMonthlyTable();
+}
+
+
+// ╔══════════════════════════════════════════════════════════╗
+// ║  TOTAL DO GRUPO (Briote + BRT)                           ║
+// ╚══════════════════════════════════════════════════════════╝
+let tMoMet='fat', tYMMet='fat';
+function swTMo(m,btn){btn.closest('.pills').querySelectorAll('.pill').forEach(p=>p.classList.remove('on'));btn.classList.add('on');tMoMet=m;renderTotal();}
+function swTYM(m,btn){btn.closest('.pills').querySelectorAll('.pill').forEach(p=>p.classList.remove('on'));btn.classList.add('on');tYMMet=m;renderTotal();}
+
+function monthAgg(yr, motel) {
+  const days = histDays(yr, motel);
+  return MONTHS.map(mo=>{
+    const d = days.filter(x=>x.month_name===mo);
+    return {fat:d.reduce((s,x)=>s+x.faturamento,0), car:d.reduce((s,x)=>s+x.carros,0), gas:d.reduce((s,x)=>s+(x.gastos_caixa||0),0), n:d.length};
+  });
+}
+function groupYear(yr) {
+  const b=monthAgg(yr,'briote'), r=monthAgg(yr,'brt');
+  const sum=(a,k)=>a.reduce((s,x)=>s+x[k],0);
+  const fatB=sum(b,'fat'), fatR=sum(r,'fat'), carB=sum(b,'car'), carR=sum(r,'car');
+  const fat=fatB+fatR, car=carB+carR;
+  return {yr, b, r, fatB, fatR, carB, carR, fat, car, gas:sum(b,'gas')+sum(r,'gas'), ticket:car>0?fat/car:0};
+}
+
+function renderTotal() {
+  if (!document.getElementById('t-kpis')) return;
+  const ym = Object.keys(DB).length ? Number(activeYear) : allHYEARS().slice(-1)[0];
+  document.getElementById('t-year-lbl').textContent = ym;
+  const g = groupYear(ym);
+  const monthsFilled = g.b.map((x,i)=>x.fat+g.r[i].fat>0).filter(Boolean).length || 1;
+  document.getElementById('t-kpis').innerHTML = `
+    <div class="kpi" style="--kc:var(--accent)"><div class="kico">💰</div><div class="klbl">Faturamento Total ${ym}</div><div class="kval">${fK(g.fat)}</div><div class="ksub">🟡 ${fK(g.fatB)} · 🟢 ${fK(g.fatR)} · média mensal ${fK(g.fat/monthsFilled)}</div></div>
+    <div class="kpi" style="--kc:var(--accent)"><div class="kico">🚗</div><div class="klbl">Carros Total ${ym}</div><div class="kval">${Math.round(g.car).toLocaleString('pt-BR')}</div><div class="ksub">🟡 ${Math.round(g.carB).toLocaleString('pt-BR')} · 🟢 ${Math.round(g.carR).toLocaleString('pt-BR')}</div></div>
+    <div class="kpi" style="--kc:var(--accent)"><div class="kico">🎯</div><div class="klbl">Ticket Médio do Grupo</div><div class="kval">${fR(g.ticket)}</div><div class="ksub">Briote ${fR(g.carB?g.fatB/g.carB:0)} · BRT ${fR(g.carR?g.fatR/g.carR:0)}</div></div>
+    <div class="kpi" style="--kc:var(--accent)"><div class="kico">📉</div><div class="klbl">Gastos de Caixa Total</div><div class="kval">${g.gas?fK(g.gas):'—'}</div><div class="ksub">${g.gas&&g.fat?(g.gas/g.fat*100).toFixed(1)+'% do faturamento':'sem dados de gastos'}</div></div>`;
+
+  // ── mês a mês (ano selecionado)
+  const val=(x)=>tMoMet==='fat'?x.fat:tMoMet==='carros'?x.car:(x.car>0?x.fat/x.car:0);
+  const fTT=v=>tMoMet==='fat'?fR(v):tMoMet==='carros'?Math.round(v)+' carros':'R$ '+v.toFixed(2);
+  const fY=v=>tMoMet==='fat'?fK(v):tMoMet==='carros'?v:'R$ '+v;
+  const tot=g.b.map((x,i)=>({fat:x.fat+g.r[i].fat,car:x.car+g.r[i].car}));
+  const ds=[];
+  if (tMoMet==='ticket') {
+    ds.push({type:'line',label:'Grupo',data:tot.map(x=>x.car>0?+(x.fat/x.car).toFixed(2):null),borderColor:'#f5f5f5',backgroundColor:'transparent',borderWidth:2.5,tension:.3,spanGaps:true,pointRadius:3});
+    ds.push({type:'line',label:'Briote',data:g.b.map(x=>x.car>0?+(x.fat/x.car).toFixed(2):null),borderColor:'#f5c842',backgroundColor:'transparent',borderWidth:1.5,tension:.3,spanGaps:true,pointRadius:2});
+    ds.push({type:'line',label:'BRT',data:g.r.map(x=>x.car>0?+(x.fat/x.car).toFixed(2):null),borderColor:'#4af0c4',backgroundColor:'transparent',borderWidth:1.5,tension:.3,spanGaps:true,pointRadius:2});
+  } else {
+    ds.push({label:'Briote',data:g.b.map(x=>val(x)||null),backgroundColor:'#f5c84299',borderColor:'#f5c842',borderWidth:1,stack:'s'});
+    ds.push({label:'BRT',data:g.r.map(x=>val(x)||null),backgroundColor:'#4af0c499',borderColor:'#4af0c4',borderWidth:1,stack:'s'});
+  }
+  mk('t-mo',{type:'bar',data:{labels:MONTHS,datasets:ds},options:{responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{position:'top',labels:{boxWidth:9}},tooltip:{callbacks:{label:c=>c.dataset.label+': '+fTT(c.parsed.y),footer:items=>tMoMet==='ticket'?'':'Grupo: '+fTT(items.reduce((s,i)=>s+(i.parsed.y||0),0))}}},
+    scales:{x:{stacked:true,grid:{color:'#1d2535'}},y:{stacked:tMoMet!=='ticket',grid:{color:'#1a2030'},ticks:{callback:fY}}}}});
+
+  // tabela mensal
+  let h=`<table class="wt"><thead><tr><th>Mês</th><th style="color:var(--briote)">🟡 Fat. Briote</th><th style="color:var(--brt)">🟢 Fat. BRT</th><th>Fat. Grupo</th><th>Carros Grupo</th><th>Ticket Grupo</th></tr></thead><tbody>`;
+  MONTHS.forEach((mo,i)=>{
+    const f=tot[i].fat, c=tot[i].car;
+    if(!f&&!c){ h+=`<tr><td style="font-weight:600">${mo}</td><td colspan="5" style="color:var(--muted)">—</td></tr>`; return; }
+    h+=`<tr><td style="font-weight:600">${mo}</td><td>${fR(g.b[i].fat)}</td><td>${fR(g.r[i].fat)}</td><td><strong>${fR(f)}</strong></td><td>${Math.round(c).toLocaleString('pt-BR')}</td><td style="color:#a78bfa">${fR(c?f/c:0)}</td></tr>`;
+  });
+  h+=`<tr style="border-top:1px solid var(--border);font-weight:700"><td>TOTAL</td><td>${fR(g.fatB)}</td><td>${fR(g.fatR)}</td><td>${fR(g.fat)}</td><td>${Math.round(g.car).toLocaleString('pt-BR')}</td><td style="color:#a78bfa">${fR(g.ticket)}</td></tr></tbody></table>`;
+  document.getElementById('t-mo-table').innerHTML=h;
+
+  // ── ano a ano (filtrado)
+  const all = allHYEARS().map(groupYear);
+  const sel = new Set(getHYEARS());
+  const rows = all.filter(x=>sel.has(x.yr));
+  const pct=(a,b)=>b>0?((a-b)/b*100):null;
+  const pTxt=p=>p===null?'—':`<span style="color:${p>=0?'var(--green)':'var(--red)'}">${p>=0?'▲':'▼'} ${Math.abs(p).toFixed(1)}%</span>`;
+  let t=`<table class="wt"><thead><tr><th>Ano</th><th style="color:var(--briote)">🟡 Briote</th><th style="color:var(--brt)">🟢 BRT</th><th>Fat. Grupo</th><th>Δ Fat.</th><th>Carros Grupo</th><th>Δ Carros</th><th>Ticket Grupo</th><th>Δ Ticket</th></tr></thead><tbody>`;
+  rows.forEach(x=>{
+    const prev=all[all.findIndex(a=>a.yr===x.yr)-1];
+    t+=`<tr><td><strong style="font-family:'Bebas Neue',cursive;font-size:1rem;letter-spacing:1px">${x.yr}</strong></td>
+      <td>${fR(x.fatB)}</td><td>${x.fatR?fR(x.fatR):'—'}</td><td><strong>${fR(x.fat)}</strong></td><td>${prev?pTxt(pct(x.fat,prev.fat)):'—'}</td>
+      <td>${Math.round(x.car).toLocaleString('pt-BR')}</td><td>${prev?pTxt(pct(x.car,prev.car)):'—'}</td>
+      <td style="color:#a78bfa">${fR(x.ticket)}</td><td>${prev?pTxt(pct(x.ticket,prev.ticket)):'—'}</td></tr>`;
+  });
+  t+='</tbody></table><div style="font-size:.66rem;color:var(--muted);margin-top:8px">Δ = variação em relação ao ano imediatamente anterior. Ano em andamento reflete apenas os dias já preenchidos.</div>';
+  document.getElementById('t-annual-table').innerHTML=t;
+
+  const labels=rows.map(x=>String(x.yr));
+  const grid={x:{grid:{color:'#1d2535'}},y:{grid:{color:'#1a2030'}}};
+  mk('t-yr-fat',{type:'bar',data:{labels,datasets:[
+    {label:'Briote',data:rows.map(x=>x.fatB),backgroundColor:'#f5c84299',borderColor:'#f5c842',borderWidth:1,stack:'s'},
+    {label:'BRT',data:rows.map(x=>x.fatR),backgroundColor:'#4af0c499',borderColor:'#4af0c4',borderWidth:1,stack:'s'}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{boxWidth:9}},tooltip:{callbacks:{label:c=>c.dataset.label+': '+fR(c.parsed.y),footer:i=>'Grupo: '+fR(i.reduce((s,k)=>s+k.parsed.y,0))}}},
+    scales:{x:{stacked:true,grid:grid.x},y:{stacked:true,grid:grid.y,ticks:{callback:v=>fK(v)}}}}});
+  mk('t-yr-car',{type:'bar',data:{labels,datasets:[
+    {label:'Briote',data:rows.map(x=>Math.round(x.carB)),backgroundColor:'#f5c84299',borderColor:'#f5c842',borderWidth:1,stack:'s'},
+    {label:'BRT',data:rows.map(x=>Math.round(x.carR)),backgroundColor:'#4af0c499',borderColor:'#4af0c4',borderWidth:1,stack:'s'}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{boxWidth:9}},tooltip:{callbacks:{label:c=>c.dataset.label+': '+c.parsed.y.toLocaleString('pt-BR')+' carros'}}},
+    scales:{x:{stacked:true,grid:grid.x},y:{stacked:true,grid:grid.y}}}});
+  mk('t-yr-tkt',{type:'line',data:{labels,datasets:[
+    {label:'Grupo',data:rows.map(x=>+x.ticket.toFixed(2)),borderColor:'#f5f5f5',backgroundColor:'#f5f5f522',borderWidth:2.5,tension:.3,pointRadius:3,fill:true},
+    {label:'Briote',data:rows.map(x=>x.carB?+(x.fatB/x.carB).toFixed(2):null),borderColor:'#f5c842',backgroundColor:'transparent',borderWidth:1.5,tension:.3,spanGaps:true},
+    {label:'BRT',data:rows.map(x=>x.carR?+(x.fatR/x.carR).toFixed(2):null),borderColor:'#4af0c4',backgroundColor:'transparent',borderWidth:1.5,tension:.3,spanGaps:true}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{boxWidth:9}},tooltip:{callbacks:{label:c=>c.dataset.label+': R$ '+c.parsed.y.toFixed(2)}}},
+    scales:{x:{grid:grid.x},y:{grid:grid.y,ticks:{callback:v=>'R$ '+v}}}}});
+  const allYrs=allHYEARS();
+  mk('t-yr-mo',{type:'line',data:{labels:MONTHS,datasets:rows.map(x=>{
+    const c=hColor(x.yr,'briote'), last=Number(x.yr)===allYrs[allYrs.length-1];
+    return {label:String(x.yr),data:MONTHS.map((_,i)=>{const f=x.b[i].fat+x.r[i].fat,k=x.b[i].car+x.r[i].car;return f||k?(tYMMet==='fat'?f:k):null;}),
+      borderColor:last?'#f5f5f5':c,backgroundColor:'transparent',borderWidth:last?2.5:1.5,tension:.3,pointRadius:last?3:1.5,spanGaps:true};})},
+    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+    plugins:{legend:{position:'top',labels:{boxWidth:9,font:{size:10}}},tooltip:{callbacks:{label:c=>c.parsed.y==null?null:c.dataset.label+': '+(tYMMet==='fat'?fR(c.parsed.y):Math.round(c.parsed.y)+' carros')}}},
+    scales:{x:{grid:grid.x},y:{grid:grid.y,ticks:{callback:v=>tYMMet==='fat'?fK(v):v}}}}});
 }
 
 // ╔══════════════════════════════════════════════════════════╗
@@ -1564,8 +1673,8 @@ function renderAll() {
   renderKPIs('b','b-kpis');   renderMo('b');   renderWT('b','b-wt');   renderRd('b','b-rd');   renderWOM('b','b-wom');   renderDn('b','b-dn');   renderSk('b','b-sk');   renderDy('b');
   renderKPIs('brt','brt-kpis');renderMo('brt');renderWT('brt','brt-wt');renderRd('brt','brt-rd');renderWOM('brt','brt-wom');renderDn('brt','brt-dn');renderSk('brt','brt-sk');renderDy('brt');
   renderCompTotalKPIs(); renderCompKPIs(); renderCMo(); renderCWD(); renderDn('b','c-db'); renderDn('brt','c-dbrt'); renderCWOM();
-  renderInlineHists();
   try{ renderHist(); }catch(e){ console.error('Histórico:',e); }
+  try{ renderTotal(); }catch(e){ console.error('Total:',e); }
 }
 
 // ╔══════════════════════════════════════════════════════════╗
