@@ -402,7 +402,7 @@ select.finput option{background:var(--s2)}
 
 <!-- HISTORICO -->
 <div class="page" id="page-hist">
-  <div class="sec"><span class="dot" style="background:var(--green)"></span>Evolução Anual — 2022 a 2025</div>
+  <div class="sec"><span class="dot" style="background:var(--green)"></span>Evolução Anual — desde a inauguração</div>
 
   <!-- KPI CARDS - 3 por ano: fat, carros, ticket -->
   <div style="margin-bottom:6px;font-size:.65rem;letter-spacing:2px;text-transform:uppercase;color:var(--briote)">🟡 BRIOTE</div>
@@ -1168,13 +1168,26 @@ function showPage(n,btn){
 
 
 // HISTORICO DATA — calculado a partir do DB
+const HISTM = {"briote":{"2008":[[3008,219381.5],[2947,208619.5],[3147,231191.5],[2768,204588.0],[3235,237184.25],[3022,223026.0],[3434,250612.0],[3732,288617.0],[3582,293923.0],[3827,318581.0],[3614,295215.5],[4191,348069.0]],"2009":[[3833,318096.0],[3277,265641.1],[3630,296685.0],[3141,228703.79],[3464,283857.5],[3495,287276.5],[3713,305759.5],[3861,312426.0],[3722,304615.0],[4056,333412.5],[3878,341556.5],[4200,378224.5]],"2010":[[3899,352015.5],[3568,320942.5],[3751,329851.0],[3466,305317.4],[3658,323360.0],[3814,339716.2],[4299,380606.8],[4062,366570.6],[4105,361613.4],[4423,395779.2],[4093,374262.3],[4573,422548.4]],"2011":[[4348,406647.8],[3740,349182.4],[3918,377923.9],[4052,354413.0],[3823,354986.5],[4087,385057.9],[4262,398251.5],[4024,381033.9],[4150,390449.5],[4296,402677.5],[4146,384085.0],[4804,478945.1]],"2012":[[4347,430373.9],[3990,397742.8],[4235,419425.66],[3512,350867.0],[3989,387001.0],[4239,424229.3],[4175,405868.5],[4250,415070.0],[4249,424986.1],[4435,442730.5],[4449,445051.0],[4846,497357.85]],"2013":[[4288,449756.0],[3606,379987.0],[4170,436835.5],[3069,314464.21],[3601,365906.7],[3813,398096.0],[3679,393640.91],[3998,424113.0],[3882,401465.38],[3935,363157.24],[4075,431410.82],[4393,487558.5]],"2014":[[4129,460902.0],[3741,414436.0],[3805,421214.0],[3182,352579.49],[3760,408598.64],[3805,404689.85],[3806,412885.8],[4197,447025.6],[4019,441014.0],[4342,470259.0],[4151,462981.0],[4341,517361.0]],"2015":[[4276,513563.0],[3620,417845.0],[3873,444258.0],[3513,401836.0],[3707,417436.0],[3769,429584.0],[3841,450502.0],[3620,446421.2],[3414,429833.9],[3392,429133.0],[3019,388326.5],[3444,443745.0]],"2016":[[3148,389019.5],[2832,347371.5],[2864,349210.0],[2608,331715.38],[2673,318048.0],[2102,274849.96],[2843,361270.1],[2578,324550.2],[2606,329842.52],[2744,365536.46],[2615,336617.0],[3057,396641.3]],"2017":[[2681,350879.8],[2442,314557.0],[2651,345289.0],[2354,307077.0],[2395,303112.0],[2446,310814.0],[2533,327219.5],[2440,314835.5],[2467,332774.4],[2365,323043.5],[2270,300583.0],[2655,356805.5]],"2018":[[2299,321830.5],[1882,263423.4],[2342,318493.33],[1882,259742.25],[1788,239449.99],[2195,300941.74],[2110,293863.22],[2072,283181.9],[2094,291775.96],[2240,309836.3],[2074,327239.5],[2513,355167.64]],"2019":[[2257,312872.46],[2033,279551.15],[2221,305814.86],[1839,251779.25],[1793,260353.33],[2206,304359.45],[1946,264029.6],[2080,294034.5],[2233,291266.15],[2223,280957.8],[2293,328232.77],[2259,332183.64]],"2020":[[2047,299925.0],[1925,281172.6],[1180,171490.3],[425,66601.5],[1490,228787.0],[1859,293058.08],[1956,309974.94],[2132,338563.4],[2271,355381.2],[2506,391043.42],[2343,364028.13],[2630,424892.3]],"2021":[[2469,396101.6],[2040,330115.2],[2034,344232.4],[2269,375818.8],[2331,387329.75],[2394,391251.5],[2564,439316.3],[2345,407597.09],[2519,442377.03],[2586,446470.22],[2483,432309.64],[2990,496730.65]],"2022":[[2637,436977.45],[2437,409118.4],[2462,415596.79],[2264,408771.03],[2192,390317.34],[2352,430051.69],[2541,452333.4],[2222,391710.25],[2420,435684.5],[2555,459880.1],[2411,446532.82],[2823,531666.85]]},"brt":{"2015":[null,null,null,null,null,null,null,null,[456,53357.1],[1182,155266.0],[1484,206384.7],[1531,209743.0]],"2016":[[1453,192751.8],[1321,168923.5],[1420,182649.0],[1559,203732.0],[1494,191925.0],[1628,205270.0],[1655,212965.0],[1517,195155.4],[1595,206512.0],[1814,236115.0],[1759,229520.5],[2057,279086.0]],"2017":[[1915,251515.0],[1734,231520.0],[1953,257259.0],[1923,246007.0],[1900,241795.6],[2061,270629.6],[2071,267754.0],[2123,274234.0],[2110,282275.5],[2044,274669.5],[1915,260891.0],[2296,321764.0]],"2018":[[2041,269333.0],[1860,253895.49],[2244,300973.5],[2150,293204.29],[1804,241584.6],[2305,316319.24],[2106,287792.13],[2129,282469.54],[2165,295636.9],[2200,296557.82],[1995,274483.1],[2461,343931.79]],"2019":[[2215,304583.16],[2157,297053.04],[2162,299858.6],[2227,309793.11],[2111,269317.8],[2325,322138.0],[2114,290015.11],[2262,302458.0],[2062,280568.6],[2323,296832.0],[2543,358110.2],[2565,379306.93]],"2020":[[2360,347122.0],[2193,318150.15],[1775,257143.5],[1909,295142.89],[2084,325481.85],[2291,361005.55],[2387,370722.01],[2579,407980.25],[2728,428681.41],[3053,483788.55],[2787,432387.55],[3059,491225.35]],"2021":[[2704,428453.95],[2484,398147.28],[2461,411733.5],[2628,437071.0],[2718,439722.84],[2669,431145.0],[2905,475763.9],[2705,456276.56],[2721,456248.25],[2883,482619.9],[2707,446040.95],[3159,520526.8]],"2022":[[2728,452377.61],[2693,444106.44],[2706,459736.9],[2755,480816.5],[2428,436150.08],[2494,445476.37],[2730,496281.2],[2453,437808.24],[2515,447974.54],[2758,490745.96],[2485,452629.5],[2867,565480.8]]}};
 function getHYEARS() {
-  return Object.keys(DB).map(Number).sort();
+  const ys = new Set(Object.keys(DB).map(Number));
+  ['briote','brt'].forEach(m=>Object.keys(HISTM[m]||{}).forEach(y=>ys.add(Number(y))));
+  return [...ys].sort((a,b)=>a-b);
+}
+// Dias reais (planilha diária) ou registros mensais embutidos (anos antigos)
+function histDays(yr, motel) {
+  const real = DB[String(yr)]?.[motel];
+  if (real && real.length) return real;
+  const arr = HISTM[motel]?.[String(yr)];
+  if (!arr) return [];
+  const out = [];
+  arr.forEach((v,i)=>{ if(v) out.push({month_name:MONTHS[i], month:i+1, faturamento:v[1], carros:v[0], date:`${yr}-${String(i+1).padStart(2,'0')}-01`}); });
+  return out;
 }
 
 function histAnnual(motel) {
   return getHYEARS().map(yr => {
-    const days = (DB[String(yr)]?.[motel]) || [];
+    const days = histDays(yr, motel);
     const fat = days.reduce((s,d)=>s+d.faturamento,0);
     const carros = days.reduce((s,d)=>s+d.carros,0);
     return { yr, fat:Math.round(fat), carros, ticket: carros>0?+(fat/carros).toFixed(2):0 };
@@ -1224,7 +1237,7 @@ function renderInlineHist(pfx) {
   // ── Line or Bar: evolução mensal ─────────────────────
   const isBar = ctype === 'bar';
   const datasets = getHYEARS().map(yr => {
-    const days = (DB[String(yr)]?.[motel])||[];
+    const days = histDays(yr, motel);
     const getData = mo => {
       const mDays=days.filter(d=>d.month_name===mo);
       if(!mDays.length) return null;
@@ -1270,8 +1283,8 @@ function renderInlineHist(pfx) {
   });
 
   // ── Bar: faturamento anual ────────────────────
-  const annFat   = getHYEARS().map(yr=>(DB[String(yr)]?.[motel]||[]).reduce((s,d)=>s+d.faturamento,0));
-  const annCars  = getHYEARS().map(yr=>(DB[String(yr)]?.[motel]||[]).reduce((s,d)=>s+d.carros,0));
+  const annFat   = getHYEARS().map(yr=>histDays(yr,motel).reduce((s,d)=>s+d.faturamento,0));
+  const annCars  = getHYEARS().map(yr=>histDays(yr,motel).reduce((s,d)=>s+d.carros,0));
   const annTkt   = getHYEARS().map((yr,i)=>annCars[i]>0?+(annFat[i]/annCars[i]).toFixed(2):0);
   const barC     = pfx==='b'?'#f5c842':'#4af0c4';
   const barCOld  = pfx==='b'?'#f5c84255':'#4af0c455';
@@ -1307,7 +1320,7 @@ function renderInlineHist(pfx) {
   const tktDs = getHYEARS().map(yr=>({
     label: String(yr),
     data: MONTHS.map(mo=>{
-      const days=(DB[String(yr)]?.[motel]||[]).filter(d=>d.month_name===mo);
+      const days=histDays(yr,motel).filter(d=>d.month_name===mo);
       const fat=days.reduce((s,d)=>s+d.faturamento,0), car=days.reduce((s,d)=>s+d.carros,0);
       return days.length&&car>0?+(fat/car).toFixed(2):null;
     }),
@@ -1352,7 +1365,7 @@ function renderHistKPIs() {
         <div class="ksub">🚗 ${a.carros.toLocaleString('pt-BR')} carros</div>
         <div style="font-family:'Bebas Neue',cursive;font-size:1.1rem;color:${isLast?c:'#a78bfa'};margin-top:4px;letter-spacing:1px">🎯 ${fR(a.ticket)} / carro</div>
       </div>`;
-    }).join('');
+    }).slice(-5).join('');
   });
 }
 
@@ -1399,7 +1412,7 @@ function renderMonthlyTable() {
   const palBRT = mkPalStr('brt');
 
   const getVal = (motel, mo, yr) => {
-    const days = (DB[String(yr)]?.[motel]||[]).filter(d=>d.month_name===mo);
+    const days = histDays(yr,motel).filter(d=>d.month_name===mo);
     if(!days.length) return 0;
     if(hTblMet==='fat') return days.reduce((s,d)=>s+d.faturamento,0);
     if(hTblMet==='carros') return days.reduce((s,d)=>s+d.carros,0);
@@ -1516,7 +1529,7 @@ function renderHistMoEvol() {
   const t=ctype('h-mo-evol','line');
   const fT=v=>hmMet==='fat'?fR(v):hmMet==='carros'?v+' carros':'R$ '+v.toFixed(2);
   const datasets=years.map(yr=>{
-    const days=(DB[String(yr)]?.[hmMotel])||[];
+    const days=histDays(yr, hmMotel);
     const vals=MONTHS.map(mo=>{
       const mDays=days.filter(d=>d.month_name===mo);
       if(!mDays.length) return null;
