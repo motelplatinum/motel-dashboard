@@ -340,7 +340,7 @@ select.finput option{background:var(--s2)}
         <div class="fgrp"><label>Nº de Carros</label><input type="number" class="finput" id="f-carros" placeholder="0"></div>
       </div>
       <div class="frow">
-        <div class="fgrp"><label>Faturamento (R$)</label><input type="number" class="finput" id="f-fat" placeholder="0.00" step="0.01"></div>
+        <div class="fgrp"><label>Faturamento (R$) — soma automática</label><input type="number" class="finput" id="f-fat" placeholder="0.00" step="0.01" readonly style="opacity:.8"></div>
         <div class="fgrp"><label>Dinheiro (R$)</label><input type="number" class="finput" id="f-cash" placeholder="0.00" step="0.01"></div>
         <div class="fgrp"><label>Cartão Crédito (R$)</label><input type="number" class="finput" id="f-cc" placeholder="0.00" step="0.01"></div>
         <div class="fgrp"><label>Cartão Débito (R$)</label><input type="number" class="finput" id="f-cd" placeholder="0.00" step="0.01"></div>
@@ -353,13 +353,17 @@ select.finput option{background:var(--s2)}
           <button class="fbtn fbtn-b" onclick="saveDay()">💾 Salvar Dia</button>
         </div>
       </div>
+      <div class="frow">
+        <div class="fgrp"><label>Senha de lançamento</label><input type="password" class="finput" id="f-pin" placeholder="senha do Apps Script" autocomplete="off"></div>
+        <div class="fgrp" style="grid-column:span 3;display:flex;align-items:flex-end;color:var(--muted);font-size:.7rem;line-height:1.5">O dia é gravado direto na planilha do Google (aba do motel). Salvar de novo a mesma data substitui os valores daquele dia.</div>
+      </div>
       <div id="f-msg" class="fmsg"></div>
     </div>
 
     <div class="sec"><span class="dot" style="background:var(--purple)"></span>Dias Lançados Manualmente</div>
     <div class="card">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:11px">
-        <div class="ctit" style="margin:0">Registro de lançamentos manuais</div>
+        <div class="ctit" style="margin:0">Dias registrados (planilha)</div>
         <select class="ysel" id="f-year-filter" onchange="renderManualTable()">
           <option value="all">Todos os anos</option>
         </select>
@@ -607,7 +611,7 @@ function jsonp(url) {
         window[cb] = data => { delete window[cb]; scr.remove(); resolve(data); };
         const scr = document.createElement('script');
         scr.onerror = () => { delete window[cb]; scr.remove(); reject(new Error('Erro ao carregar. Verifique se o Apps Script está implantado.')); };
-        scr.src = url + '?callback=' + cb;
+        scr.src = url + (url.includes('?')?'&':'?') + 'callback=' + cb;
         document.head.appendChild(scr);
       });
     });
@@ -952,55 +956,69 @@ function deleteYear(y) {
 // ╔══════════════════════════════════════════════════════════╗
 // ║  FORMULÁRIO                                              ║
 // ╚══════════════════════════════════════════════════════════╝
-function saveDay() {
+function calcFatForm() {
+  const g = id => parseFloat(document.getElementById(id).value)||0;
+  const fat = g('f-gas')+g('f-cash')+g('f-cc')+g('f-cd')+g('f-pix')+g('f-res');
+  document.getElementById('f-fat').value = fat ? fat.toFixed(2) : '';
+  return fat;
+}
+['f-gas','f-cash','f-cc','f-cd','f-pix','f-res'].forEach(id=>{
+  const el=document.getElementById(id); if(el) el.addEventListener('input',calcFatForm);
+});
+try { const pin=localStorage.getItem('motel_pin'); if(pin) document.getElementById('f-pin').value=pin; } catch(e){}
+
+async function saveDay() {
   const msg = document.getElementById('f-msg');
+  const btn = document.querySelector('#page-form .fbtn');
   const motel = document.getElementById('f-motel').value;
   const dateStr = document.getElementById('f-date').value;
-  const carros = parseFloat(document.getElementById('f-carros').value)||0;
-  const fat    = parseFloat(document.getElementById('f-fat').value)||0;
-  const cash   = parseFloat(document.getElementById('f-cash').value)||0;
-  const cc     = parseFloat(document.getElementById('f-cc').value)||0;
-  const cd     = parseFloat(document.getElementById('f-cd').value)||0;
-  const pix    = parseFloat(document.getElementById('f-pix').value)||0;
-  const res    = parseFloat(document.getElementById('f-res').value)||0;
-  const gas    = parseFloat(document.getElementById('f-gas').value)||0;
+  const g = id => parseFloat(document.getElementById(id).value)||0;
+  const carros=g('f-carros'), cash=g('f-cash'), cc=g('f-cc'), cd=g('f-cd'), pix=g('f-pix'), res=g('f-res'), gas=g('f-gas');
+  const fat = calcFatForm();
+  const pin = document.getElementById('f-pin').value;
+  const fail = t => { msg.textContent='❌ '+t; msg.className='fmsg err'; };
 
-  if (!dateStr) { msg.textContent='❌ Selecione uma data.'; msg.className='fmsg err'; return; }
-  if (carros<=0 && fat<=0) { msg.textContent='❌ Informe pelo menos os carros ou o faturamento.'; msg.className='fmsg err'; return; }
+  if (!dateStr) return fail('Selecione uma data.');
+  if (carros<=0 && fat<=0) return fail('Informe pelo menos os carros ou os valores.');
+  if (!pin) return fail('Digite a senha de lançamento.');
 
   const dt = new Date(dateStr+'T12:00:00');
   const year = String(dt.getFullYear());
-  const month = dt.getMonth()+1;
-  const day = dt.getDate();
-  const wdIdx = (dt.getDay()+6)%7;
-  const WD = ['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo'];
-  const MN = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
+  const month = dt.getMonth()+1, day = dt.getDate();
+  const url = SHEETS[year] || SHEETS[Number(year)];
+  if (!url) return fail(`Não há planilha configurada para ${year}.`);
 
-  const rec = {
-    date: dateStr, month, month_name: MN[month-1], day,
-    weekday: WD[wdIdx], weekday_num: wdIdx,
-    faturamento: fat, carros, gastos_caixa: gas,
-    cash, cc, cd, pix, reservas: res
-  };
+  const qs = new URLSearchParams({action:'save', pin, motel, date:dateStr, gastos:gas, cash, cc, cd, pix, reservas:res, fat:fat.toFixed(2), carros}).toString();
+  msg.textContent='⏳ Gravando na planilha...'; msg.className='fmsg';
+  if (btn) btn.disabled = true;
+  try {
+    const r = await jsonp(url + '?' + qs);
+    if (!r || !r.ok) { fail((r && r.error) || 'Resposta inesperada do Apps Script. Verifique se o script foi atualizado e reimplantado.'); return; }
+    try { localStorage.setItem('motel_pin', pin); } catch(e){}
 
-  if (!DB[year]) DB[year] = {briote:[], brt:[]};
-  const arr = DB[year][motel];
-  // remove if exists
-  const idx = arr.findIndex(d=>d.date===dateStr);
-  if (idx>=0) arr.splice(idx,1);
-  arr.push(rec);
-  arr.sort((a,b)=>a.date.localeCompare(b.date));
+    // atualiza a tela com o dia gravado
+    const WD = ['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo'];
+    const MN = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'];
+    const wdIdx = (dt.getDay()+6)%7;
+    const rec = { date:dateStr, month, month_name:MN[month-1], day, weekday:WD[wdIdx], weekday_num:wdIdx,
+      faturamento:fat, carros, gastos_caixa:gas, cash, cc, cd, pix, reservas:res };
+    if (!DB[year]) DB[year] = {briote:[], brt:[]};
+    const arr = DB[year][motel];
+    const idx = arr.findIndex(d=>d.date===dateStr);
+    if (idx>=0) arr.splice(idx,1);
+    if (carros>0 || fat>0) arr.push(rec);
+    arr.sort((a,b)=>a.date.localeCompare(b.date));
+    if (year === activeYear) recompute();
+    renderAll(); buildYearSel(); renderManualTable();
 
-  // recompute if this year is active
-  if (year === activeYear) { recompute(); renderAll(); }
-  buildYearSel();
-  renderHist();
-renderManualTable();
-
-  msg.textContent=`✅ Dia ${dateStr} lançado com sucesso no ${motel==='briote'?'Briote':'BRT'}!`;
-  msg.className='fmsg ok';
-  // clear fields
-  ['f-carros','f-fat','f-cash','f-cc','f-cd','f-pix','f-res','f-gas'].forEach(id=>document.getElementById(id).value='');
+    msg.textContent = `✅ Dia ${dateStr} gravado na planilha (${motel==='briote'?'Briote':'BRT'}, linha ${r.linha}).` + (r.avisos&&r.avisos.length?' Obs.: '+r.avisos.join('; ')+'.':'');
+    msg.className = 'fmsg ok';
+    ['f-carros','f-fat','f-cash','f-cc','f-cd','f-pix','f-res','f-gas'].forEach(id=>document.getElementById(id).value='');
+  } catch(err) {
+    fail('Não consegui falar com a planilha: '+err.message);
+  } finally {
+    if (btn) btn.disabled = false;
+  }
 }
 
 function renderManualTable() {
@@ -1019,18 +1037,8 @@ function renderManualTable() {
     <td>${d.date}</td>
     <td><span style="color:${d.motel==='briote'?'var(--briote)':'var(--brt)'};font-weight:600">${d.motel==='briote'?'🟡 Briote':'🟢 BRT'}</span></td>
     <td>${d.carros}</td><td>${fR(d.faturamento)}</td><td>${fR(d.cash)}</td><td>${fR(d.cc)}</td><td>${fR(d.cd)}</td><td>${fR(d.pix)}</td><td>${fR(d.reservas)}</td><td>${fR(d.gastos_caixa)}</td>
-    <td><button class="delbtn" onclick="delDay('${d.motel}','${d.date}')">✕</button></td>
+    <td></td>
   </tr>`).join('');
-}
-
-function delDay(motel, dateStr) {
-  if (!confirm(`Excluir ${dateStr} do ${motel}?`)) return;
-  const year = dateStr.slice(0,4);
-  if (!DB[year]) return;
-  DB[year][motel] = (DB[year][motel]||[]).filter(d=>d.date!==dateStr);
-  if (year===activeYear) { recompute(); renderAll(); }
-  renderHist();
-renderManualTable();
 }
 
 // ╔══════════════════════════════════════════════════════════╗
