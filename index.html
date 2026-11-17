@@ -144,6 +144,7 @@ select.finput option{background:var(--s2)}
   <button class="ntab tu" onclick="showPage('upload',this)">📂 Carregar Planilha</button>
   <div class="nav-right">
     <select class="ysel" id="yearSel" onchange="switchYear(this.value)"></select>
+    <select class="ysel" id="monthSel" onchange="switchMonth(this.value)"></select>
     <button class="expbtn" onclick="exportHTML()">💾 Exportar HTML</button>
   </div>
 </nav>
@@ -538,6 +539,8 @@ select.finput option{background:var(--s2)}
 let DB = {};
 let HIST = {briote:{}, brt:{}};
 let activeYear = '2025';
+const MESES_FULL = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+let activeMonth = '';   // '' = ano todo; senão abreviação (JAN..DEZ)
 
 const COL = m => m==='b'?'#f5c842':'#4af0c4';
 // ── Google Sheets config ──────────────────────────────────────────────────
@@ -679,10 +682,22 @@ function computeStats(daily) {
   return {ms, wdS, wkS, daily, totals:{fat:tF,carros:tC,gastos:daily.reduce((a,d)=>a+d.gastos_caixa,0),ticket:tC>0?tF/tC:0}};
 }
 
+function monthFilter(days) { return activeMonth ? days.filter(d=>d.month_name===activeMonth) : days; }
+function periodLbl() {
+  if (!activeMonth) return activeYear;
+  const i = MONTHS.indexOf(activeMonth);
+  return (MESES_FULL[i]||activeMonth) + ' ' + activeYear;
+}
 function recompute() {
   const yr = DB[activeYear] || {};
-  ST.b   = computeStats(yr.briote || []);
-  ST.brt = computeStats(yr.brt    || []);
+  ST.b   = computeStats(monthFilter(yr.briote || []));
+  ST.brt = computeStats(monthFilter(yr.brt    || []));
+  [ST.b, ST.brt].forEach(s => { s.nMonths = Object.values(s.ms).filter(x=>x.days>0).length || 1; });
+}
+function switchMonth(v) {
+  activeMonth = v;
+  recompute();
+  renderAll();
 }
 
 // ╔══════════════════════════════════════════════════════════╗
@@ -726,10 +741,10 @@ const fK = v => v>=1e6?'R$ '+(v/1e6).toFixed(2)+'M':'R$ '+(v/1000).toFixed(0)+'k
 function renderKPIs(m, id) {
   const s=ST[m].totals, c=COL(m), lbl=m==='b'?'Briote':'BRT', ic=m==='b'?'🟡':'🟢';
   document.getElementById(id).innerHTML=`
-    <div class="kpi" style="--kc:${c}"><div class="kico">💰</div><div class="klbl">Faturamento Total</div><div class="kval">${fK(s.fat)}</div><div class="ksub">Média mensal: ${fK(s.fat/12)}</div></div>
+    <div class="kpi" style="--kc:${c}"><div class="kico">💰</div><div class="klbl">Faturamento Total</div><div class="kval">${fK(s.fat)}</div><div class="ksub">${activeMonth?'Média/dia: '+fR(s.fat/(ST[m].daily.length||1)):'Média mensal: '+fK(s.fat/(ST[m].nMonths||1))}</div></div>
     <div class="kpi" style="--kc:${c}"><div class="kico">🚗</div><div class="klbl">Carros Atendidos</div><div class="kval">${s.carros.toLocaleString('pt-BR')}</div><div class="ksub">Média/dia: ${(s.carros/(ST[m].daily.length||1)).toFixed(1)}</div></div>
     <div class="kpi" style="--kc:${c}"><div class="kico">📉</div><div class="klbl">Gastos de Caixa</div><div class="kval">${fK(s.gastos)}</div><div class="ksub">Média/dia: ${fR(s.gastos/(ST[m].daily.length||1))}</div></div>
-    <div class="kpi" style="--kc:${c}"><div class="kico">🎯</div><div class="klbl">Ticket Médio/Carro</div><div class="kval">${fR(s.ticket)}</div><div class="ksub">${ic} ${lbl} · ${activeYear}</div></div>`;
+    <div class="kpi" style="--kc:${c}"><div class="kico">🎯</div><div class="klbl">Ticket Médio/Carro</div><div class="kval">${fR(s.ticket)}</div><div class="ksub">${ic} ${lbl} · ${periodLbl()}</div></div>`;
 }
 
 // Monthly bar
@@ -838,10 +853,10 @@ function renderCompTotalKPIs() {
   const ticket=carros>0?fat/carros:0;
   const days=Math.max(ST.b.daily.length, ST.brt.daily.length)||1;
   document.getElementById('comp-total-kpis').innerHTML=`
-    <div class="kpi" style="--kc:var(--accent)"><div class="kico">💰</div><div class="klbl">Faturamento Total Grupo</div><div class="kval">${fK(fat)}</div><div class="ksub">Média mensal: ${fK(fat/12)}</div></div>
+    <div class="kpi" style="--kc:var(--accent)"><div class="kico">💰</div><div class="klbl">Faturamento Total Grupo</div><div class="kval">${fK(fat)}</div><div class="ksub">${activeMonth?'Média/dia: '+fR(fat/days):'Média mensal: '+fK(fat/Math.max(ST.b.nMonths,ST.brt.nMonths,1))}</div></div>
     <div class="kpi" style="--kc:var(--accent)"><div class="kico">🚗</div><div class="klbl">Carros Atendidos Grupo</div><div class="kval">${carros.toLocaleString('pt-BR')}</div><div class="ksub">Média/dia: ${(carros/days).toFixed(1)}</div></div>
     <div class="kpi" style="--kc:var(--accent)"><div class="kico">📉</div><div class="klbl">Gastos Totais Grupo</div><div class="kval">${fK(gastos)}</div><div class="ksub">${(gastos/fat*100).toFixed(1)}% do faturamento</div></div>
-    <div class="kpi" style="--kc:var(--accent)"><div class="kico">🎯</div><div class="klbl">Ticket Médio Grupo</div><div class="kval">${fR(ticket)}</div><div class="ksub">Briote+BRT · ${activeYear}</div></div>`;
+    <div class="kpi" style="--kc:var(--accent)"><div class="kico">🎯</div><div class="klbl">Ticket Médio Grupo</div><div class="kval">${fR(ticket)}</div><div class="ksub">Briote+BRT · ${periodLbl()}</div></div>`;
 }
 
 function renderCompKPIs() {
@@ -912,7 +927,13 @@ function renderCWOM() {
 // ╔══════════════════════════════════════════════════════════╗
 // ║  YEAR SELECTOR                                           ║
 // ╚══════════════════════════════════════════════════════════╝
+function buildMonthSel() {
+  const el = document.getElementById('monthSel'); if(!el) return;
+  el.innerHTML = '<option value="">Ano todo</option>' + MONTHS.map((m,i)=>`<option value="${m}" ${m===activeMonth?'selected':''}>${MESES_FULL[i]}</option>`).join('');
+}
+
 function buildYearSel() {
+  buildMonthSel();
   const years = Object.keys(DB).sort();
   const sel = document.getElementById('yearSel');
   sel.innerHTML = years.map(y=>`<option value="${y}" ${y===activeYear?'selected':''}>${y}</option>`).join('');
@@ -1581,8 +1602,11 @@ function monthAgg(yr, motel) {
     return {fat:d.reduce((s,x)=>s+x.faturamento,0), car:d.reduce((s,x)=>s+x.carros,0), gas:d.reduce((s,x)=>s+(x.gastos_caixa||0),0), n:d.length};
   });
 }
-function groupYear(yr) {
-  const b=monthAgg(yr,'briote'), r=monthAgg(yr,'brt');
+function groupYear(yr, only) {
+  const zero={fat:0,car:0,gas:0,n:0};
+  const keep=(a)=>only?a.map(x=>x):a;
+  let b=monthAgg(yr,'briote'), r=monthAgg(yr,'brt');
+  if (only) { b=b.map(x=>x.__i===undefined?x:x); b=b.map((x,i)=>MONTHS[i]===only?x:{...zero}); r=r.map((x,i)=>MONTHS[i]===only?x:{...zero}); }
   const sum=(a,k)=>a.reduce((s,x)=>s+x[k],0);
   const fatB=sum(b,'fat'), fatR=sum(r,'fat'), carB=sum(b,'car'), carR=sum(r,'car');
   const fat=fatB+fatR, car=carB+carR;
@@ -1592,12 +1616,12 @@ function groupYear(yr) {
 function renderTotal() {
   if (!document.getElementById('t-kpis')) return;
   const ym = Object.keys(DB).length ? Number(activeYear) : allHYEARS().slice(-1)[0];
-  document.getElementById('t-year-lbl').textContent = ym;
-  const g = groupYear(ym);
+  document.getElementById('t-year-lbl').textContent = activeMonth ? periodLbl() : ym;
+  const g = groupYear(ym, activeMonth||null);
   const monthsFilled = g.b.map((x,i)=>x.fat+g.r[i].fat>0).filter(Boolean).length || 1;
   document.getElementById('t-kpis').innerHTML = `
-    <div class="kpi" style="--kc:var(--accent)"><div class="kico">💰</div><div class="klbl">Faturamento Total ${ym}</div><div class="kval">${fK(g.fat)}</div><div class="ksub">🟡 ${fK(g.fatB)} · 🟢 ${fK(g.fatR)} · média mensal ${fK(g.fat/monthsFilled)}</div></div>
-    <div class="kpi" style="--kc:var(--accent)"><div class="kico">🚗</div><div class="klbl">Carros Total ${ym}</div><div class="kval">${Math.round(g.car).toLocaleString('pt-BR')}</div><div class="ksub">🟡 ${Math.round(g.carB).toLocaleString('pt-BR')} · 🟢 ${Math.round(g.carR).toLocaleString('pt-BR')}</div></div>
+    <div class="kpi" style="--kc:var(--accent)"><div class="kico">💰</div><div class="klbl">Faturamento Total ${activeMonth?periodLbl():ym}</div><div class="kval">${fK(g.fat)}</div><div class="ksub">🟡 ${fK(g.fatB)} · 🟢 ${fK(g.fatR)} · média mensal ${fK(g.fat/monthsFilled)}</div></div>
+    <div class="kpi" style="--kc:var(--accent)"><div class="kico">🚗</div><div class="klbl">Carros Total ${activeMonth?periodLbl():ym}</div><div class="kval">${Math.round(g.car).toLocaleString('pt-BR')}</div><div class="ksub">🟡 ${Math.round(g.carB).toLocaleString('pt-BR')} · 🟢 ${Math.round(g.carR).toLocaleString('pt-BR')}</div></div>
     <div class="kpi" style="--kc:var(--accent)"><div class="kico">🎯</div><div class="klbl">Ticket Médio do Grupo</div><div class="kval">${fR(g.ticket)}</div><div class="ksub">Briote ${fR(g.carB?g.fatB/g.carB:0)} · BRT ${fR(g.carR?g.fatR/g.carR:0)}</div></div>
     <div class="kpi" style="--kc:var(--accent)"><div class="kico">📉</div><div class="klbl">Gastos de Caixa Total</div><div class="kval">${g.gas?fK(g.gas):'—'}</div><div class="ksub">${g.gas&&g.fat?(g.gas/g.fat*100).toFixed(1)+'% do faturamento':'sem dados de gastos'}</div></div>`;
 
