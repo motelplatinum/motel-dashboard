@@ -140,6 +140,7 @@ select.finput option{background:var(--s2)}
   <button class="ntab tc" onclick="showPage('comp',this)">⚡ Comparativo</button>
   <button class="ntab th" onclick="showPage('hist',this)">📈 Histórico</button>
   <button class="ntab tc" onclick="showPage('total',this)">Σ Total Grupo</button>
+  <button class="ntab th" onclick="showPage('exp',this)">💸 Despesas</button>
   <button class="ntab tf" onclick="showPage('form',this)">✏️ Lançar Dia</button>
   <button class="ntab tu" onclick="showPage('upload',this)">📂 Carregar Planilha</button>
   <div class="nav-right">
@@ -276,6 +277,72 @@ select.finput option{background:var(--s2)}
         </div>
       </div>
       <div style="position:relative;height:230px"><canvas id="t-yr-mo"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<div class="page" id="page-exp">
+  <div class="sec"><span class="dot" style="background:var(--accent2)"></span>Despesas e Margens (DRE)</div>
+  <div id="exp-empty" class="card" style="display:none;margin-bottom:14px;color:var(--muted);font-size:.8rem;line-height:1.6"></div>
+  <div id="exp-body">
+    <div class="card" style="margin-bottom:14px">
+      <div style="font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Motel</div>
+      <div class="pills" id="exp-motel" style="margin-bottom:12px">
+        <button class="pill on" onclick="expSetMotel('g',this)">Grupo</button>
+        <button class="pill" onclick="expSetMotel('b',this)">🟡 Briote</button>
+        <button class="pill" onclick="expSetMotel('brt',this)">🟢 BRT</button>
+      </div>
+      <div style="font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Anos</div>
+      <div class="pills" id="exp-years" style="margin-bottom:0;flex-wrap:wrap"></div>
+    </div>
+
+    <div class="kgrid" id="exp-kpis"></div>
+
+    <div class="card" style="margin-bottom:14px">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:11px">
+        <div class="ctit" style="margin-bottom:0">Evolução mês a mês — um traço por ano</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          <select class="ysel" id="exp-cat" onchange="renderExp()"></select>
+          <div class="pills" id="exp-met" style="margin-bottom:0">
+            <button class="pill on" onclick="expSetMet('desp',this)">R$</button>
+            <button class="pill" onclick="expSetMet('pct',this)">% do fat.</button>
+            <button class="pill" onclick="expSetMet('lucro',this)">Lucro R$</button>
+            <button class="pill" onclick="expSetMet('margem',this)">Margem %</button>
+          </div>
+        </div>
+      </div>
+      <div style="position:relative;height:270px"><canvas id="exp-evol"></canvas></div>
+      <div id="exp-evol-note" style="font-size:.66rem;color:var(--muted);margin-top:6px"></div>
+    </div>
+
+    <div class="card" style="margin-bottom:14px">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:11px">
+        <div class="ctit" style="margin-bottom:0">Despesas por categoria — mês a mês</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          <select class="ysel" id="exp-tbl-year" onchange="renderExp()"></select>
+          <div class="pills" id="exp-tbl-mode" style="margin-bottom:0">
+            <button class="pill on" onclick="expSetTbl('r',this)">R$</button>
+            <button class="pill" onclick="expSetTbl('p',this)">% do fat.</button>
+          </div>
+        </div>
+      </div>
+      <div id="exp-table" style="overflow-x:auto"></div>
+    </div>
+
+    <div class="card" style="margin-bottom:14px">
+      <div class="ctit">Comparar dois períodos</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
+        <span style="color:var(--muted);font-size:.7rem">A</span>
+        <select class="ysel" id="exp-ay" onchange="renderExp()"></select><select class="ysel" id="exp-am" onchange="renderExp()"></select>
+        <span style="color:var(--muted);font-size:.7rem;margin-left:8px">contra B</span>
+        <select class="ysel" id="exp-by" onchange="renderExp()"></select><select class="ysel" id="exp-bm" onchange="renderExp()"></select>
+      </div>
+      <div id="exp-cmp" style="overflow-x:auto"></div>
+    </div>
+
+    <div class="card" style="margin-bottom:14px">
+      <div class="ctit">Resumo anual (só meses com despesas lançadas)</div>
+      <div id="exp-annual" style="overflow-x:auto"></div>
     </div>
   </div>
 </div>
@@ -538,6 +605,8 @@ select.finput option{background:var(--s2)}
 // ── Declarações globais ──────────────────────────────────────────────────
 let DB = {};
 let HIST = {briote:{}, brt:{}};
+let EXP = {};   // EXP[ano][mesIdx] = {b:{fat,desp,lucro,cats}, brt:{...}}
+let EXP_CATS = [];
 let activeYear = '2025';
 const MESES_FULL = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 let activeMonth = '';   // '' = ano todo; senão abreviação (JAN..DEZ)
@@ -604,6 +673,37 @@ function parseSheetData(rows, year) {
   return res;
 }
 
+
+function parseRelatorio(rows) {
+  const isDate = v => typeof v==='string' && /^\d{4}-\d{2}-\d{2}T/.test(v);
+  const n = v => { const x = parseFloat(v); return isNaN(x) ? 0 : x; };
+  const starts = [];
+  rows.forEach((r,i)=>{ if (isDate(r[0]) && String(r[1]).trim()==='DRE') starts.push(i); });
+  const out = [];
+  starts.slice(0,12).forEach((st,mi)=>{
+    const end = Math.min(st+75, rows.length);
+    const acc = {b:{fat:0,desp:0,lucro:0,cats:{}}, brt:{fat:0,desp:0,lucro:0,cats:{}}};
+    let gotFat=false, inDesp=false, doneDesp=false;
+    for (let i=st;i<end;i++) {
+      const r = rows[i], l = String(r[0]||'').trim(), vb = n(r[1]), vr = n(r[3]);
+      if (!gotFat) { if (l==='Faturamento Total') { acc.b.fat=vb; acc.brt.fat=vr; gotFat=true; } continue; }
+      if (!inDesp && !doneDesp) { if (l==='Despesas') inDesp=true; continue; }
+      if (inDesp) {
+        if (l==='Total Despesas') { acc.b.desp=vb; acc.brt.desp=vr; inDesp=false; doneDesp=true; }
+        else if (l) {
+          let c = EXP_CATS.find(x=>x.toLowerCase()===l.toLowerCase());
+          if (!c) { c = l; EXP_CATS.push(c); }
+          acc.b.cats[c]=(acc.b.cats[c]||0)+vb; acc.brt.cats[c]=(acc.brt.cats[c]||0)+vr;
+        }
+        continue;
+      }
+      if (doneDesp && l.startsWith('Lucro Operacional')) { acc.b.lucro=vb; acc.brt.lucro=vr; break; }
+    }
+    out[mi] = acc;
+  });
+  return out;
+}
+
 function jsonp(url) {
   return fetch(url)
     .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
@@ -630,6 +730,7 @@ async function iniciar() {
       if (!DB[y]) DB[y] = {briote:[], brt:[]};
       if (data.BRIOTE) DB[y].briote = parseSheetData(data.BRIOTE, parseInt(year));
       if (data.BRT)    DB[y].brt    = parseSheetData(data.BRT,    parseInt(year));
+      if (data.RELATORIO) { try { EXP[y] = parseRelatorio(data.RELATORIO); } catch(e) { console.error('RELATORIO',y,e); } }
     }
     const years = Object.keys(DB).sort();
     activeYear = years.at(-1);
@@ -1698,6 +1799,152 @@ function renderTotal() {
     scales:{x:{grid:grid.x},y:{grid:grid.y,ticks:{callback:v=>tYMMet==='fat'?fK(v):v}}}}});
 }
 
+
+// ╔══════════════════════════════════════════════════════════╗
+// ║  DESPESAS E MARGENS (DRE)                                ║
+// ╚══════════════════════════════════════════════════════════╝
+let expMotel='g', expMet='desp', expTbl='r', expSel=null, expInit=false;
+const EXP_PAL=['#6a7a99','#a78bfa','#60a5fa','#ff6b35','#e879f9','#94a3b8'];
+const expYears=()=>Object.keys(EXP).map(Number).sort((a,b)=>a-b);
+function expYearColor(y){ const ys=expYears(), i=ys.indexOf(y); return i===ys.length-1 ? '#f5c842' : EXP_PAL[i%EXP_PAL.length]; }
+function expSelYears(){ const ys=expYears(); if(expSel===null) return ys.slice(-3); const f=ys.filter(y=>expSel.has(y)); return f.length?f:ys.slice(-1); }
+
+// Dados de um mês (ou null se não lançado). Grupo exige os dois motéis lançados.
+function expMonth(yr, mi, motel) {
+  const m = EXP[yr] && EXP[yr][mi]; if (!m) return null;
+  const parts = motel==='g' ? [m.b, m.brt] : [m[motel]];
+  if (parts.some(p=>!(p.desp>0))) return null;
+  const out={fat:0,desp:0,lucro:0,cats:{}};
+  parts.forEach(p=>{ out.fat+=p.fat; out.desp+=p.desp; out.lucro+=p.lucro; Object.entries(p.cats).forEach(([k,v])=>{ out.cats[k]=(out.cats[k]||0)+v; }); });
+  return out;
+}
+function expAgg(yr, months, motel) {
+  const out={fat:0,desp:0,lucro:0,cats:{},n:0};
+  months.forEach(mi=>{ const d=expMonth(yr,mi,motel); if(!d) return; out.n++; out.fat+=d.fat; out.desp+=d.desp; out.lucro+=d.lucro; Object.entries(d.cats).forEach(([k,v])=>{ out.cats[k]=(out.cats[k]||0)+v; }); });
+  return out;
+}
+const expFilled=(yr,motel)=>MONTHS.map((_,i)=>i).filter(i=>expMonth(yr,i,motel));
+const pc=(a,b)=>b>0?a/b*100:0;
+const fP=v=>v.toFixed(1)+'%';
+const deltaTxt=(d,badUp)=>{ if(d===null||!isFinite(d)) return '—'; const up=d>=0, bad=badUp?up:!up; return `<span style="color:${Math.abs(d)<0.05?'var(--muted)':bad?'var(--red)':'var(--green)'}">${up?'▲':'▼'} ${Math.abs(d).toFixed(1)}%</span>`; };
+const ppTxt=(d,badUp)=>{ const up=d>=0, bad=badUp?up:!up; return `<span style="color:${Math.abs(d)<0.05?'var(--muted)':bad?'var(--red)':'var(--green)'}">${up?'+':'−'}${Math.abs(d).toFixed(1)} p.p.</span>`; };
+
+function expSetMotel(m,btn){ btn.closest('.pills').querySelectorAll('.pill').forEach(p=>p.classList.remove('on')); btn.classList.add('on'); expMotel=m; renderExp(); }
+function expSetMet(m,btn){ btn.closest('.pills').querySelectorAll('.pill').forEach(p=>p.classList.remove('on')); btn.classList.add('on'); expMet=m; renderExp(); }
+function expSetTbl(m,btn){ btn.closest('.pills').querySelectorAll('.pill').forEach(p=>p.classList.remove('on')); btn.classList.add('on'); expTbl=m; renderExp(); }
+function expToggleYear(y){ const cur=new Set(expSelYears()); if(cur.has(y)){ if(cur.size>1) cur.delete(y);} else cur.add(y); expSel=cur; renderExp(); }
+
+function expBuildControls() {
+  const ys=expYears();
+  document.getElementById('exp-years').innerHTML = ys.map(y=>`<button class="pill${expSelYears().includes(y)?' on':''}" onclick="expToggleYear(${y})">${y}</button>`).join('');
+  const catSel=document.getElementById('exp-cat'), prev=catSel.value;
+  catSel.innerHTML='<option value="">Total de despesas</option>'+EXP_CATS.map(c=>`<option value="${c}">${c}</option>`).join('');
+  if (EXP_CATS.includes(prev)) catSel.value=prev;
+  const optY=(el,val)=>{ const p=el.value; el.innerHTML=ys.map(y=>`<option value="${y}">${y}</option>`).join(''); el.value = p&&ys.includes(Number(p))?p:val; };
+  optY(document.getElementById('exp-tbl-year'), String(ys[ys.length-1]));
+  const monthOpts='<option value="">Ano todo</option>'+MONTHS.map((m,i)=>`<option value="${i}">${MESES_FULL[i]}</option>`).join('');
+  if (!expInit) {
+    // padrão: último mês lançado contra o mesmo mês do ano anterior (ou mês anterior)
+    let ly=ys[ys.length-1], lm=-1;
+    for (let k=ys.length-1;k>=0 && lm<0;k--){ const f=expFilled(ys[k],expMotel); if(f.length){ ly=ys[k]; lm=f[f.length-1]; } }
+    let ay=ly-1, am=lm;
+    if (lm<0) { lm=0; am=0; }
+    if (!(EXP[ay] && expMonth(ay,am,expMotel))) { ay=ly; am=Math.max(lm-1,0); }
+    ['exp-am','exp-bm'].forEach(id=>document.getElementById(id).innerHTML=monthOpts);
+    optY(document.getElementById('exp-ay'), String(ay)); optY(document.getElementById('exp-by'), String(ly));
+    document.getElementById('exp-am').value=String(am); document.getElementById('exp-bm').value=String(lm);
+    expInit=true;
+  } else {
+    optY(document.getElementById('exp-ay'), String(ys[0])); optY(document.getElementById('exp-by'), String(ys[ys.length-1]));
+  }
+}
+
+function renderExp() {
+  const empty=document.getElementById('exp-empty'), body=document.getElementById('exp-body');
+  if (!empty) return;
+  if (!expYears().length) {
+    body.style.display='none'; empty.style.display='block';
+    empty.innerHTML='Ainda não há dados de despesas. Atualize o <strong>Apps Script</strong> de cada planilha com o código novo (arquivo <code>apps_script_lancamento.gs</code>), reimplante e recarregue o site. O dashboard lê a aba <strong>RELATORIO</strong>.';
+    return;
+  }
+  empty.style.display='none'; body.style.display='block';
+  expBuildControls();
+  const years=expSelYears(), motel=expMotel;
+  const lblM = motel==='g'?'Grupo':motel==='b'?'Briote':'BRT';
+
+  // ── KPIs por ano
+  document.getElementById('exp-kpis').innerHTML = years.map(y=>{
+    const f=expFilled(y,motel), a=expAgg(y,f,motel);
+    if(!a.n) return `<div class="kpi" style="--kc:${expYearColor(y)}"><div class="klbl">${y}</div><div class="kval">—</div><div class="ksub">sem despesas lançadas</div></div>`;
+    const per=`${MONTHS[f[0]]}–${MONTHS[f[f.length-1]]}`;
+    return `<div class="kpi" style="--kc:${expYearColor(y)}"><div class="kico">📅</div><div class="klbl">${y} · ${lblM} · ${per} (${a.n} meses)</div>
+      <div class="kval">${fP(pc(a.lucro,a.fat))}</div>
+      <div class="ksub">margem · lucro ${fK(a.lucro)} · despesas ${fK(a.desp)} (${fP(pc(a.desp,a.fat))} do fat.) · fat. ${fK(a.fat)}</div></div>`;
+  }).join('');
+
+  // ── evolução mês a mês
+  const cat=document.getElementById('exp-cat').value;
+  let met=expMet; const note=document.getElementById('exp-evol-note');
+  if (cat && (met==='lucro'||met==='margem')) { met='desp'; note.textContent='Lucro e margem valem para o total; mostrando a categoria em R$.'; } else note.textContent='Meses sem despesas lançadas ficam em branco.';
+  const val=d=>{ if(!d) return null; const v=cat?(d.cats[cat]||0):d.desp;
+    return met==='desp'?v : met==='pct'?pc(v,d.fat) : met==='lucro'?d.lucro : pc(d.lucro,d.fat); };
+  const isPct=(met==='pct'||met==='margem');
+  mk('exp-evol',{type:'line',data:{labels:MONTHS,datasets:years.map((y,i)=>({label:String(y),
+    data:MONTHS.map((_,mi)=>{ const v=val(expMonth(y,mi,motel)); return v===null?null:+v.toFixed(2); }),
+    borderColor:expYearColor(y),backgroundColor:'transparent',borderWidth:i===years.length-1?2.8:1.8,tension:.25,pointRadius:3,spanGaps:false}))},
+    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+    plugins:{legend:{position:'top',labels:{boxWidth:9}},tooltip:{callbacks:{label:c=>c.parsed.y==null?null:c.dataset.label+': '+(isPct?c.parsed.y.toFixed(1)+'%':fR(c.parsed.y))}}},
+    scales:{x:{grid:{color:'#1d2535'}},y:{grid:{color:'#1a2030'},ticks:{callback:v=>isPct?v+'%':fK(v)}}}}});
+
+  // ── tabela categoria × mês
+  const ty=Number(document.getElementById('exp-tbl-year').value);
+  const fm=expFilled(ty,motel);
+  const cats=EXP_CATS.filter(c=>MONTHS.some((_,i)=>{const d=expMonth(ty,i,motel);return d&&(d.cats[c]||0)!==0;}));
+  const agg=expAgg(ty,fm,motel);
+  const cell=(v,fat)=>expTbl==='r'?fR(v):fP(pc(v,fat));
+  let t=`<table class="wt"><thead><tr><th>Categoria</th>${MONTHS.map(m=>`<th>${m}</th>`).join('')}<th>Total</th><th>% fat.</th></tr></thead><tbody>`;
+  cats.forEach(c=>{
+    const maxPct=Math.max(...MONTHS.map((_,i)=>{const d=expMonth(ty,i,motel);return d?pc(d.cats[c]||0,d.fat):0;}),0.0001);
+    t+=`<tr><td style="font-weight:600">${c}</td>`+MONTHS.map((_,i)=>{ const d=expMonth(ty,i,motel); if(!d) return '<td style="color:var(--muted)">—</td>'; const v=d.cats[c]||0, a=Math.min(pc(v,d.fat)/maxPct,1)*0.32; return `<td style="background:rgba(255,107,53,${a.toFixed(2)})">${cell(v,d.fat)}</td>`; }).join('')+`<td><strong>${cell(agg.cats[c]||0,agg.fat)}</strong></td><td>${fP(pc(agg.cats[c]||0,agg.fat))}</td></tr>`;
+  });
+  const row=(lbl,getter,bold)=>`<tr style="${bold?'border-top:1px solid var(--border);font-weight:700':''}"><td>${lbl}</td>`+MONTHS.map((_,i)=>{const d=expMonth(ty,i,motel);return d?`<td>${getter(d)}</td>`:'<td style="color:var(--muted)">—</td>';}).join('')+`<td>${agg.n?getter(agg):'—'}</td><td></td></tr>`;
+  t+=row('Total Despesas',d=>cell(d.desp,d.fat),true)+row('Faturamento',d=>fR(d.fat),false)+row('Lucro Operacional',d=>fR(d.lucro),true)+row('Margem',d=>fP(pc(d.lucro,d.fat)),true);
+  t+='</tbody></table>';
+  document.getElementById('exp-table').innerHTML = agg.n ? t : '<div style="color:var(--muted);font-size:.8rem">Sem despesas lançadas em '+ty+'.</div>';
+
+  // ── comparador A × B
+  const ay=Number(document.getElementById('exp-ay').value), by=Number(document.getElementById('exp-by').value);
+  const am=document.getElementById('exp-am').value, bm=document.getElementById('exp-bm').value;
+  let aMs, bMs, nota='';
+  if (am==='' && bm==='') { const fb=new Set(expFilled(by,motel)); aMs=expFilled(ay,motel).filter(i=>fb.has(i)); bMs=aMs; nota=`Ano contra ano considerando só os meses lançados nos dois anos: ${aMs.map(i=>MONTHS[i]).join(', ')||'nenhum'}.`; }
+  else { aMs=am===''?expFilled(ay,motel):[Number(am)]; bMs=bm===''?expFilled(by,motel):[Number(bm)]; if(am===''||bm==='') nota='Atenção: um dos lados é o ano todo e o outro é um mês só — os valores não são comparáveis em R$, olhe os % do faturamento.'; }
+  const A=expAgg(ay,aMs,motel), B=expAgg(by,bMs,motel);
+  const lblP=(y,m)=>m===''?`${y} (ano)`:`${MESES_FULL[Number(m)]} ${y}`;
+  if (!A.n||!B.n) {
+    document.getElementById('exp-cmp').innerHTML=`<div style="color:var(--muted);font-size:.8rem">${!A.n?lblP(ay,am):lblP(by,bm)} não tem despesas lançadas.</div>`;
+  } else {
+    const allC=EXP_CATS.filter(c=>(A.cats[c]||0)||(B.cats[c]||0));
+    const rw=(c,a,b,fa,fb,bold,badUp=true)=>`<tr style="${bold?'border-top:1px solid var(--border);font-weight:700':''}"><td>${c}</td><td>${fR(a)}</td><td>${fP(pc(a,fa))}</td><td>${fR(b)}</td><td>${fP(pc(b,fb))}</td><td>${fR(b-a)}</td><td>${a>0?deltaTxt((b-a)/a*100,badUp):'—'}</td><td>${ppTxt(pc(b,fb)-pc(a,fa),badUp)}</td></tr>`;
+    let h=`<table class="wt"><thead><tr><th>Categoria</th><th>A · ${lblP(ay,am)}</th><th>% fat.</th><th>B · ${lblP(by,bm)}</th><th>% fat.</th><th>Δ R$</th><th>Δ %</th><th>Δ % fat.</th></tr></thead><tbody>`;
+    allC.forEach(c=>{ h+=rw(c,A.cats[c]||0,B.cats[c]||0,A.fat,B.fat,false); });
+    h+=rw('Total Despesas',A.desp,B.desp,A.fat,B.fat,true);
+    h+=`<tr><td>Faturamento</td><td>${fR(A.fat)}</td><td></td><td>${fR(B.fat)}</td><td></td><td>${fR(B.fat-A.fat)}</td><td>${deltaTxt(A.fat>0?(B.fat-A.fat)/A.fat*100:null,false)}</td><td></td></tr>`;
+    h+=`<tr style="font-weight:700"><td>Lucro Operacional</td><td>${fR(A.lucro)}</td><td>${fP(pc(A.lucro,A.fat))}</td><td>${fR(B.lucro)}</td><td>${fP(pc(B.lucro,B.fat))}</td><td>${fR(B.lucro-A.lucro)}</td><td>${A.lucro>0?deltaTxt((B.lucro-A.lucro)/A.lucro*100,false):'—'}</td><td>${ppTxt(pc(B.lucro,B.fat)-pc(A.lucro,A.fat),false)}</td></tr></tbody></table>`;
+    document.getElementById('exp-cmp').innerHTML=h+(nota?`<div style="font-size:.66rem;color:var(--muted);margin-top:8px">${nota}</div>`:'');
+  }
+
+  // ── resumo anual
+  const ysAll=expYears();
+  let r=`<table class="wt"><thead><tr><th>Ano</th><th>Meses</th><th>Faturamento</th><th>Despesas</th><th>% fat.</th><th>Lucro Op.</th><th>Margem</th><th>Δ Margem</th></tr></thead><tbody>`;
+  let prev=null;
+  ysAll.forEach(y=>{ const f=expFilled(y,motel), a=expAgg(y,f,motel); if(!a.n) return;
+    const mg=pc(a.lucro,a.fat);
+    r+=`<tr><td><strong style="font-family:'Bebas Neue',cursive;font-size:1rem;letter-spacing:1px">${y}</strong></td><td>${a.n} (${MONTHS[f[0]]}–${MONTHS[f[f.length-1]]})</td><td>${fR(a.fat)}</td><td>${fR(a.desp)}</td><td>${fP(pc(a.desp,a.fat))}</td><td>${fR(a.lucro)}</td><td><strong>${fP(mg)}</strong></td><td>${prev===null?'—':ppTxt(mg-prev,false)}</td></tr>`;
+    prev=mg; });
+  r+='</tbody></table><div style="font-size:.66rem;color:var(--muted);margin-top:8px">Cada ano soma apenas os meses com despesas lançadas; se os anos têm quantidades de meses diferentes, use o comparador acima para meses equivalentes.</div>';
+  document.getElementById('exp-annual').innerHTML=r;
+}
+
 // ╔══════════════════════════════════════════════════════════╗
 // ║  RENDER ALL                                              ║
 // ╚══════════════════════════════════════════════════════════╝
@@ -1707,6 +1954,7 @@ function renderAll() {
   renderCompTotalKPIs(); renderCompKPIs(); renderCMo(); renderCWD(); renderDn('b','c-db'); renderDn('brt','c-dbrt'); renderCWOM();
   try{ renderHist(); }catch(e){ console.error('Histórico:',e); }
   try{ renderTotal(); }catch(e){ console.error('Total:',e); }
+  try{ renderExp(); }catch(e){ console.error('Despesas:',e); }
 }
 
 // ╔══════════════════════════════════════════════════════════╗
