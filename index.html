@@ -344,6 +344,31 @@ select.finput option{background:var(--s2)}
       <div class="ctit">Resumo anual (só meses com despesas lançadas)</div>
       <div id="exp-annual" style="overflow-x:auto"></div>
     </div>
+
+    <div class="sec" style="margin-top:26px"><span class="dot" style="background:var(--accent4)"></span>Brothers (holding) — aluguéis, despesas e destino do caixa</div>
+    <div class="kgrid" id="exp-bkpis"></div>
+    <div class="card" style="margin-bottom:14px">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:11px">
+        <div class="ctit" style="margin-bottom:0">Brothers — evolução mês a mês (anos selecionados acima)</div>
+        <div class="pills" id="exp-bmet" style="margin-bottom:0">
+          <button class="pill on" onclick="expSetBMet('rec',this)">Receitas</button>
+          <button class="pill" onclick="expSetBMet('desp',this)">Despesas</button>
+          <button class="pill" onclick="expSetBMet('lucro',this)">Lucro Op.</button>
+          <button class="pill" onclick="expSetBMet('amort',this)">Amort./Juros</button>
+          <button class="pill" onclick="expSetBMet('dest',this)">Retiradas</button>
+          <button class="pill" onclick="expSetBMet('result',this)">Resultado</button>
+        </div>
+      </div>
+      <div style="position:relative;height:250px"><canvas id="exp-bevol"></canvas></div>
+    </div>
+    <div class="card" style="margin-bottom:14px">
+      <div class="ctit">Brothers — mês a mês (ano escolhido na tabela de categorias)</div>
+      <div id="exp-btable" style="overflow-x:auto"></div>
+    </div>
+    <div class="card" style="margin-bottom:14px">
+      <div class="ctit">Brothers — comparar os períodos A e B (mesma escolha do comparador acima)</div>
+      <div id="exp-bcmp" style="overflow-x:auto"></div>
+    </div>
   </div>
 </div>
 
@@ -683,7 +708,7 @@ function parseRelatorio(rows) {
   starts.slice(0,12).forEach((st,mi)=>{
     const end = Math.min(st+75, rows.length);
     const acc = {b:{fat:0,desp:0,lucro:0,cats:{}}, brt:{fat:0,desp:0,lucro:0,cats:{}}};
-    let gotFat=false, inDesp=false, doneDesp=false;
+    let gotFat=false, inDesp=false, doneDesp=false, bi=end;
     for (let i=st;i<end;i++) {
       const r = rows[i], l = String(r[0]||'').trim(), vb = n(r[1]), vr = n(r[3]);
       if (!gotFat) { if (l==='Faturamento Total') { acc.b.fat=vb; acc.brt.fat=vr; gotFat=true; } continue; }
@@ -697,8 +722,24 @@ function parseRelatorio(rows) {
         }
         continue;
       }
-      if (doneDesp && l.startsWith('Lucro Operacional')) { acc.b.lucro=vb; acc.brt.lucro=vr; break; }
+      if (doneDesp && l.startsWith('Lucro Operacional')) { acc.b.lucro=vb; acc.brt.lucro=vr; bi=i+1; break; }
     }
+    // ── bloco BROTHERS (holding): aluguéis recebidos, despesas, amortizações e destinos do caixa
+    const bro = {rec:{},recTotal:0,desp:{},despTotal:0,lucro:0,amort:0,dest:{},destTotal:0,result:0};
+    let sec='seek';
+    for (let i=bi;i<end && sec!=='done';i++) {
+      const l=String(rows[i][0]||'').trim(), v=n(rows[i][1]);
+      if (!l) continue;
+      if (sec==='seek') { if (l==='BROTHERS') sec='wantRec'; continue; }
+      if (sec==='wantRec') { if (l==='Aluguéis') sec='rec'; continue; }
+      if (sec==='rec') { if (l==='Total') { bro.recTotal=v; sec='wantDesp'; } else bro.rec[l]=v; continue; }
+      if (sec==='wantDesp') { if (l==='Despesas') sec='desp'; continue; }
+      if (sec==='desp') { if (l==='Total Despesas') { bro.despTotal=v; sec='wantLucro'; } else bro.desp[l]=v; continue; }
+      if (sec==='wantLucro') { if (l.startsWith('Lucro Operacional')) { bro.lucro=v; sec='wantAmort'; } continue; }
+      if (sec==='wantAmort') { if (l.startsWith('Amortiza')) { bro.amort=v; sec='dest'; } continue; }
+      if (sec==='dest') { if (l==='Total') { bro.result=v; sec='done'; } else { bro.dest[l]=v; bro.destTotal+=v; } continue; }
+    }
+    acc.bro = bro;
     out[mi] = acc;
   });
   return out;
@@ -1943,6 +1984,83 @@ function renderExp() {
     prev=mg; });
   r+='</tbody></table><div style="font-size:.66rem;color:var(--muted);margin-top:8px">Cada ano soma apenas os meses com despesas lançadas; se os anos têm quantidades de meses diferentes, use o comparador acima para meses equivalentes.</div>';
   document.getElementById('exp-annual').innerHTML=r;
+  renderExpBro();
+}
+
+
+// ── BROTHERS ──────────────────────────────────────────────
+let expBMet='rec';
+function expSetBMet(m,btn){ btn.closest('.pills').querySelectorAll('.pill').forEach(p=>p.classList.remove('on')); btn.classList.add('on'); expBMet=m; renderExpBro(); }
+function broMonth(yr,mi){ const m=EXP[yr]&&EXP[yr][mi]; return (m&&m.bro&&m.bro.despTotal>0)?m.bro:null; }
+const broFilled=yr=>MONTHS.map((_,i)=>i).filter(i=>broMonth(yr,i));
+function broAgg(yr,months){
+  const o={rec:{},recTotal:0,desp:{},despTotal:0,lucro:0,amort:0,dest:{},destTotal:0,result:0,n:0};
+  months.forEach(mi=>{ const b=broMonth(yr,mi); if(!b) return; o.n++;
+    ['recTotal','despTotal','lucro','amort','destTotal','result'].forEach(k=>o[k]+=b[k]);
+    ['rec','desp','dest'].forEach(g=>Object.entries(b[g]).forEach(([k,v])=>{ o[g][k]=(o[g][k]||0)+v; })); });
+  return o;
+}
+const broVal=(b,k)=>k==='rec'?b.recTotal:k==='desp'?b.despTotal:k==='lucro'?b.lucro:k==='amort'?b.amort:k==='dest'?b.destTotal:b.result;
+
+function renderExpBro() {
+  if (!document.getElementById('exp-bkpis')) return;
+  const years=expSelYears();
+  document.getElementById('exp-bkpis').innerHTML = years.map(y=>{
+    const f=broFilled(y), a=broAgg(y,f);
+    if(!a.n) return `<div class="kpi" style="--kc:${expYearColor(y)}"><div class="klbl">Brothers ${y}</div><div class="kval">—</div><div class="ksub">sem lançamentos</div></div>`;
+    return `<div class="kpi" style="--kc:${expYearColor(y)}"><div class="kico">🏢</div><div class="klbl">Brothers ${y} · ${MONTHS[f[0]]}–${MONTHS[f[f.length-1]]} (${a.n} meses)</div>
+      <div class="kval">${fK(a.result)}</div>
+      <div class="ksub">resultado final · receitas ${fK(a.recTotal)} · despesas ${fK(a.despTotal)} · lucro op. ${fK(a.lucro)} · amort./juros ${fK(a.amort)} · retiradas ${fK(a.destTotal)}</div></div>`;
+  }).join('');
+
+  const k=expBMet;
+  mk('exp-bevol',{type:'line',data:{labels:MONTHS,datasets:years.map((y,i)=>({label:String(y),
+    data:MONTHS.map((_,mi)=>{ const b=broMonth(y,mi); return b?+broVal(b,k).toFixed(2):null; }),
+    borderColor:expYearColor(y),backgroundColor:'transparent',borderWidth:i===years.length-1?2.8:1.8,tension:.25,pointRadius:3}))},
+    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+    plugins:{legend:{position:'top',labels:{boxWidth:9}},tooltip:{callbacks:{label:c=>c.parsed.y==null?null:c.dataset.label+': '+fR(c.parsed.y)}}},
+    scales:{x:{grid:{color:'#1d2535'}},y:{grid:{color:'#1a2030'},ticks:{callback:v=>fK(v)}}}}});
+
+  // tabela do ano escolhido
+  const ty=Number(document.getElementById('exp-tbl-year').value), fm=broFilled(ty), tot=broAgg(ty,fm);
+  const lines=(grp)=>{ const keys=[]; MONTHS.forEach((_,i)=>{ const b=broMonth(ty,i); if(b) Object.keys(b[grp]).forEach(x=>{ if(!keys.includes(x)) keys.push(x); }); }); return keys; };
+  const rowI=(lbl,get,tcell,bold,hdr)=>`<tr style="${bold?'border-top:1px solid var(--border);font-weight:700':''}${hdr?';background:var(--surface2)':''}"><td>${lbl}</td>`+MONTHS.map((_,i)=>{const b=broMonth(ty,i);if(!b)return '<td style="color:var(--muted)">—</td>';const v=get(b);return `<td>${v===null?'':fR(v)}</td>`;}).join('')+`<td>${tcell===null?'':fR(tcell)}</td></tr>`;
+  if (!tot.n) document.getElementById('exp-btable').innerHTML='<div style="color:var(--muted);font-size:.8rem">Sem lançamentos da Brothers em '+ty+'.</div>';
+  else {
+    let t=`<table class="wt"><thead><tr><th>Linha</th>${MONTHS.map(m=>`<th>${m}</th>`).join('')}<th>Total</th></tr></thead><tbody>`;
+    t+=rowI('RECEITAS (aluguéis)',()=>null,null,false,true);
+    lines('rec').forEach(x=>{ t+=rowI(x,b=>b.rec[x]||0,tot.rec[x]||0); });
+    t+=rowI('Total receitas',b=>b.recTotal,tot.recTotal,true);
+    t+=rowI('DESPESAS',()=>null,null,false,true);
+    lines('desp').forEach(x=>{ t+=rowI(x,b=>b.desp[x]||0,tot.desp[x]||0); });
+    t+=rowI('Total despesas',b=>b.despTotal,tot.despTotal,true);
+    t+=rowI('Lucro operacional',b=>b.lucro,tot.lucro,true);
+    t+=rowI('Amortizações e juros',b=>b.amort,tot.amort,false);
+    t+=rowI('RETIRADAS / DESTINOS',()=>null,null,false,true);
+    lines('dest').forEach(x=>{ t+=rowI(x,b=>b.dest[x]||0,tot.dest[x]||0); });
+    t+=rowI('Total retiradas',b=>b.destTotal,tot.destTotal,true);
+    t+=rowI('RESULTADO FINAL',b=>b.result,tot.result,true);
+    document.getElementById('exp-btable').innerHTML=t+'</tbody></table>';
+  }
+
+  // comparador A x B (mesmos seletores do comparador de motéis)
+  const ay=Number(document.getElementById('exp-ay').value), by=Number(document.getElementById('exp-by').value);
+  const am=document.getElementById('exp-am').value, bm=document.getElementById('exp-bm').value;
+  let aMs,bMs;
+  if (am===''&&bm==='') { const fb=new Set(broFilled(by)); aMs=broFilled(ay).filter(i=>fb.has(i)); bMs=aMs; }
+  else { aMs=am===''?broFilled(ay):[Number(am)]; bMs=bm===''?broFilled(by):[Number(bm)]; }
+  const A=broAgg(ay,aMs), B=broAgg(by,bMs);
+  const lblP=(y,m)=>m===''?`${y} (ano)`:`${MESES_FULL[Number(m)]} ${y}`;
+  if(!A.n||!B.n){ document.getElementById('exp-bcmp').innerHTML=`<div style="color:var(--muted);font-size:.8rem">${!A.n?lblP(ay,am):lblP(by,bm)} não tem lançamentos da Brothers.</div>`; return; }
+  const rw=(c,a,b,bold,badUp)=>`<tr style="${bold?'border-top:1px solid var(--border);font-weight:700':''}"><td>${c}</td><td>${fR(a)}</td><td>${fR(b)}</td><td>${fR(b-a)}</td><td>${a!==0?deltaTxt((b-a)/Math.abs(a)*100,badUp):'—'}</td></tr>`;
+  let h=`<table class="wt"><thead><tr><th>Linha</th><th>A · ${lblP(ay,am)}</th><th>B · ${lblP(by,bm)}</th><th>Δ R$</th><th>Δ %</th></tr></thead><tbody>`;
+  const names=g=>[...new Set([...Object.keys(A[g]),...Object.keys(B[g])])].filter(x=>(A[g][x]||0)||(B[g][x]||0));
+  names('rec').forEach(x=>h+=rw(x,A.rec[x]||0,B.rec[x]||0,false,false)); h+=rw('Total receitas',A.recTotal,B.recTotal,true,false);
+  names('desp').forEach(x=>h+=rw(x,A.desp[x]||0,B.desp[x]||0,false,true)); h+=rw('Total despesas',A.despTotal,B.despTotal,true,true);
+  h+=rw('Lucro operacional',A.lucro,B.lucro,true,false)+rw('Amortizações e juros',A.amort,B.amort,false,true);
+  names('dest').forEach(x=>h+=rw(x,A.dest[x]||0,B.dest[x]||0,false,true)); h+=rw('Total retiradas',A.destTotal,B.destTotal,true,true);
+  h+=rw('RESULTADO FINAL',A.result,B.result,true,false);
+  document.getElementById('exp-bcmp').innerHTML=h+'</tbody></table>';
 }
 
 // ╔══════════════════════════════════════════════════════════╗
