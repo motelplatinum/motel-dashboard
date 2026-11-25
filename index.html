@@ -845,7 +845,7 @@ const WDS    = ['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo'
 function computeStats(daily) {
   const ms = {};
   MONTHS.forEach(m => ms[m]={fat:0,carros:0,gastos:0,cash:0,cc:0,cd:0,pix:0,reservas:0,days:0});
-  const wd = {}; WDS.forEach(w => wd[w]=[]);
+  const wd = {}; WDS.forEach(w => wd[w]=[]); const wdD = {}; WDS.forEach(w => wdD[w]=[]);
   const wk = {'1ª':[],'2ª':[],'3ª':[],'4ª':[],'5ª':[]};
   const wkk = d => d<=7?'1ª':d<=14?'2ª':d<=21?'3ª':d<=28?'4ª':'5ª';
   daily.forEach(d => {
@@ -853,11 +853,13 @@ function computeStats(daily) {
     if (!ms[m]) return;
     ms[m].fat+=d.faturamento; ms[m].carros+=d.carros; ms[m].gastos+=d.gastos_caixa;
     ms[m].cash+=d.cash; ms[m].cc+=d.cc; ms[m].cd+=d.cd; ms[m].pix+=d.pix; ms[m].reservas+=d.reservas; ms[m].days++;
-    if (wd[d.weekday]) wd[d.weekday].push(d.carros);
+    if (wd[d.weekday]) { wd[d.weekday].push(d.carros); wdD[d.weekday].push(d.date); }
     wk[wkk(d.day)].push(d.carros);
   });
   const wdS = {};
-  WDS.forEach(w => { if(wd[w].length) wdS[w]={avg:+(wd[w].reduce((a,b)=>a+b,0)/wd[w].length).toFixed(1),max:Math.max(...wd[w]),min:Math.min(...wd[w])}; });
+  WDS.forEach(w => { if(wd[w].length) wdS[w]={avg:+(wd[w].reduce((a,b)=>a+b,0)/wd[w].length).toFixed(1),max:Math.max(...wd[w]),min:Math.min(...wd[w])};
+    const dl=v=>wdD[w].filter((_,i)=>wd[w][i]===v).map(x=>{const q=String(x).slice(0,10).split('-');return q.length===3?q[2]+'/'+q[1]+'/'+q[0]:x;}).join(', ');
+    wdS[w].maxD=dl(wdS[w].max); wdS[w].minD=dl(wdS[w].min); });
   const wkS = {};
   Object.keys(wk).forEach(k => { if(wk[k].length) wkS[k]={avg:+(wk[k].reduce((a,b)=>a+b,0)/wk[k].length).toFixed(1),total:wk[k].reduce((a,b)=>a+b,0)}; });
   const tF=daily.reduce((a,d)=>a+d.faturamento,0), tC=daily.reduce((a,d)=>a+d.carros,0);
@@ -960,7 +962,7 @@ function renderWT(m, id) {
         <div style="position:absolute;inset:0;border-radius:3px;background:linear-gradient(90deg,${c}33,${c}88)"></div>
         <div style="position:absolute;width:8px;height:8px;background:#fff;border-radius:50%;top:50%;transform:translateY(-50%);left:calc(${ap}% - 4px);border:2px solid var(--bg)"></div>
       </div></td>
-      <td><span class="tag tmin">${s.min}</span></td><td><span class="tag tmax">${s.max}</span></td>`;
+      <td><span class="tag tmin" style="cursor:help" title="Menor movimento: ${s.minD}">${s.min}</span></td><td><span class="tag tmax" style="cursor:help" title="Maior movimento: ${s.maxD}">${s.max}</span></td>`;
     tb.appendChild(tr);
   });
 }
@@ -972,7 +974,7 @@ function renderRd(m, id) {
     {label:'Média',data:WDS.map(w=>wd[w]?.avg||0),borderColor:c,backgroundColor:c+'18',pointBackgroundColor:c,borderWidth:2},
     {label:'Máx',data:WDS.map(w=>wd[w]?.max||0),borderColor:c+'66',backgroundColor:'transparent',borderWidth:1,borderDash:[4,4]},
     {label:'Mín',data:WDS.map(w=>wd[w]?.min||0),borderColor:'#ff6b3566',backgroundColor:'transparent',borderWidth:1,borderDash:[4,4]}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:8,padding:7}}},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:8,padding:7}},tooltip:{callbacks:{afterLabel:c=>{const w=WDS[c.dataIndex],x=wd[w];return x&&c.dataset.label==='Máx'?'em '+x.maxD:x&&c.dataset.label==='Mín'?'em '+x.minD:'';}}}},
       scales:{r:{grid:{color:'#232d3f'},ticks:{backdropColor:'transparent',stepSize:25},pointLabels:{color:'#dde3ef',font:{size:10}}}}}});
 }
 
