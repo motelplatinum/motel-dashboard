@@ -1823,7 +1823,7 @@ function renderTotal() {
     ds.push({label:'Briote',data:g.b.map(x=>val(x)||null),backgroundColor:'#f5c84299',borderColor:'#f5c842',borderWidth:1,stack:'s'});
     ds.push({label:'BRT',data:g.r.map(x=>val(x)||null),backgroundColor:'#4af0c499',borderColor:'#4af0c4',borderWidth:1,stack:'s'});
   }
-  mk('t-mo',{type:'bar',data:{labels:MONTHS,datasets:ds},options:{responsive:true,maintainAspectRatio:false,
+  mk('t-mo',{type:'bar',data:{labels:MONTHS,datasets:ds},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
     plugins:{legend:{position:'top',labels:{boxWidth:9}},tooltip:{callbacks:{label:c=>c.dataset.label+': '+fTT(c.parsed.y),footer:items=>tMoMet==='ticket'?'':'Grupo: '+fTT(items.reduce((s,i)=>s+(i.parsed.y||0),0))}}},
     scales:{x:{stacked:true,grid:{color:'#1d2535'}},y:{stacked:tMoMet!=='ticket',grid:{color:'#1a2030'},ticks:{callback:fY}}}}});
 
@@ -1859,7 +1859,7 @@ function renderTotal() {
   mk('t-yr-fat',{type:'bar',data:{labels,datasets:[
     {label:'Briote',data:rows.map(x=>x.fatB),backgroundColor:'#f5c84299',borderColor:'#f5c842',borderWidth:1,stack:'s'},
     {label:'BRT',data:rows.map(x=>x.fatR),backgroundColor:'#4af0c499',borderColor:'#4af0c4',borderWidth:1,stack:'s'}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{boxWidth:9}},tooltip:{callbacks:{label:c=>c.dataset.label+': '+fR(c.parsed.y),footer:i=>'Grupo: '+fR(i.reduce((s,k)=>s+k.parsed.y,0))}}},
+    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'top',labels:{boxWidth:9}},tooltip:{callbacks:{label:c=>c.dataset.label+': '+fR(c.parsed.y),footer:i=>'Grupo: '+fR(i.reduce((s,k)=>s+k.parsed.y,0))}}},
     scales:{x:{stacked:true,grid:grid.x},y:{stacked:true,grid:grid.y,ticks:{callback:v=>fK(v)}}}}});
   mk('t-yr-car',{type:'bar',data:{labels,datasets:[
     {label:'Briote',data:rows.map(x=>Math.round(x.carB)),backgroundColor:'#f5c84299',borderColor:'#f5c842',borderWidth:1,stack:'s'},
