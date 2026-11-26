@@ -1838,7 +1838,7 @@ function renderTotal() {
   document.getElementById('t-mo-table').innerHTML=h;
 
   // ── ano a ano (filtrado)
-  const all = allHYEARS().map(groupYear);
+  const all = allHYEARS().map(y=>groupYear(y));
   const sel = new Set(getHYEARS());
   const rows = all.filter(x=>sel.has(x.yr));
   const pct=(a,b)=>b>0?((a-b)/b*100):null;
